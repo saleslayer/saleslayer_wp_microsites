@@ -1,0 +1,17 @@
+1. Modify commented controller.php header
+
+/*
+Plugin Name: Sales Layer
+Plugin URI: http://saleslayer.com/
+Description: Sales Layer connector.
+Version: 1.6
+Author: Sales Layer
+Author URI: http://www.cloud.saleslayer.com/
+License: A "Slug" license name e.g. GPL2
+*/
+
+2. Modify settings.php
+
+3. Modify readme.txt
+
+4. Package!
