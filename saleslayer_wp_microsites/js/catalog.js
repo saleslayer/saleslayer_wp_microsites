@@ -432,7 +432,7 @@ function paintProduct(product) {
 			$('#p_product_description').empty().append(options.product_description);
 			$('#p_characteristics')    .empty().append(options.characteristics);
 			$('#p_formats')    .empty().append(options.formats);
-			$('#backcatalog').attr("onclick","backCatalog('"+options.catalogue_id+"'); return false;");
+			$('#backcatalog').attr("onclick","backCatalog('"+options.ID_CATALOG+"'); return false;");
 
 			if (options.hasOwnProperty('product_image') && options.product_image!='' && options.product_image!=null) {
 

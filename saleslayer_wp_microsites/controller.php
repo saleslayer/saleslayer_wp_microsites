@@ -1,12 +1,13 @@
 <?php
 /*
-Plugin Name: Sales Layer
-Plugin URI: http://cloud.saleslayer.com/
-Description: Sales Layer connector.
+Plugin Name: Sales Layer WP Microsites
+Plugin URI: https://github.com/saleslayer/Sales_Layer_Wordpress
+Description: Sales Layer microsites connector.
 Version: 1.6
 Author: Sales Layer
-Author URI: http://cloud.saleslayer.com/
-License: A "Slug" license name e.g. GPL2
+Author URI: http://saleslayer.com/
+License: GPLv3
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 */
 
 if ( PHP_SESSION_NONE === session_status() ) {

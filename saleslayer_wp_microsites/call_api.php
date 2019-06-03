@@ -30,10 +30,10 @@ if(isset($_POST['endpoint'])) {
 
 	$page_url = '';
 
-	if ($page_permalink != ''){
+	if ($page_permalink != '') {
 
 		$page_url = home_url().'/'.$page_permalink.'/';
-
+		
 	}
 
 	$apiSC = new Softclear_API();
@@ -72,7 +72,7 @@ if(isset($_POST['endpoint'])) {
 
 			$search_value = (isset($_POST['search_value'])) ? addslashes($_POST['search_value']) : 0;
 			
-			$return = $apiSC->search_item($search_value, $page_url);
+			$return = $apiSC->search_item($search_value);
 
 			break;
 
