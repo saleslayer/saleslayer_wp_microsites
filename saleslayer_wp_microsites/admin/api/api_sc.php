@@ -43,7 +43,13 @@ class Softclear_API {
 
 		if ($this->debug_on) {
 
+			$new_file = false;
+			if (!file_exists($this->debug_filepath)){ $new_file = true; }
+
 			file_put_contents($this->debug_filepath, '['.microtime ()."] $string\n", FILE_APPEND);
+
+			if ($new_file) chmod($this->debug_filepath, 0777);
+
 		}	
 	}
 

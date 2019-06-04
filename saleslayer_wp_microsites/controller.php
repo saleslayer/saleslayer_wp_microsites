@@ -485,30 +485,33 @@ function prepare_html_data($type, $data){
                         if (count($product['product_image']) > 1){
 
                             if (isset($image[$img_fmt]) && $image[$img_fmt] != ''){
-                                $change_image = $imo.",'".$image[$img_fmt]."', 'undefined'";
 
-                                $carousel_html .= '<li class="imo'.$imo.'"><a href="#" onclick="return changeImage('.$change_image.')"><img src="'.$image[$img_fmt].'"></a></li>';
+                                $change_image = $imo.",'".$image['THM']."','".$image[$img_fmt]."'";
 
                             }else{
 
                                 $change_image = $imo.",'".$image['THM']."', 'undefined'";
-                                $carousel_html .= '<li class="imo'.$imo.'"><a href="#" onclick="return changeImage('.$change_image.')"><img src="'.$image['THM'].'"></a></li>';
 
                             }
+
+                            $carousel_html .= '<li class="imo'.$imo.'"><a href="#" onclick="return changeImage('.$change_image.')"><img src="'.$image['TH'].'"></a></li>';
 
                         }
                             
                         if (!$div_image_preview_finished){
 
+
                             if (isset($image[$img_fmt]) && $image[$img_fmt] != ''){
                                 
-                                $gallery_html .= '<img id="preview" src="'.$image[$img_fmt].'"></div>';
+                                $gallery_html .= '<a id="apreview" rel="shadowbox" href='.$image[$img_fmt].'><img id="preview" class="vw_detl" src="'.$image['THM'].'"></div></a>';
+
 
                             }else{
-
+                                
                                 $gallery_html .= '<img id="preview" src="'.$image['THM'].'"></div>';
 
                             }
+                            
 
                             $div_image_preview_finished = true;
 

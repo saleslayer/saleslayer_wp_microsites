@@ -371,7 +371,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
             
                     foreach ($info as $table =>& $data) {
 
-                        if (!isset($data_schema[$table]))  { 
+                        if (!isset($data_schema[$table])) { 
                             
                             $data_schema[$table] = [
 
@@ -390,7 +390,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                         foreach ($data['fields'] as $field =>& $struc) {
 
                             if ($field) {
-                                
+                  
                                 $is_key = ($struc['type'] == 'key' or substr($field, 0, 3) == 'ID_');
 
                                 if (!$is_key) {
@@ -416,11 +416,6 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                                             'has_multilingual' => 1,
                                             'titles'           => []
                                         ];
-
-                                        if ($struc['type'] == 'image') {
-
-                                            $data_schema[$table]['fields'][$db_field]['image_sizes'] = $struc['image_sizes'];
-                                        }
                                     }
 
                                     $language = (isset($struc['language_code']) ? $struc['language_code'] : $default_language);
@@ -433,9 +428,15 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                                     $data_schema[$table]['fields'][$db_field] = [
 
-                                        'name' => $field,
-                                        'type' => $struc['type']
+                                        'name'   => $field,
+                                        'type'   => $struc['type'],
+                                        'titles' => (isset($struc['titles']) ? $struc['titles'] : [ $default_language => $struc['title'] ])
                                     ];
+                                }
+
+                                if ($struc['type'] == 'image') {
+
+                                    $data_schema[$table]['fields'][$db_field]['image_sizes'] = $struc['image_sizes'];
                                 }
                             }
                         } 
@@ -2334,12 +2335,13 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                 foreach ($fields as $name => $field) {
 
-                    if (   isset($schema[$field])) {
+                    if (isset($schema[$field])) {
 
                         $info       =& $schema[$field];
                         $field_name =  addslashes(is_string($name) ? $name : ($get_internal_names ? $field : $info['name']));
+                        $is_file    =  in_array($info['type'], [ 'image', 'file' ]);
 
-                        if (in_array($info['type'], [ 'image', 'file' ])) ++ $has_json_fields;
+                        if ($is_file) ++ $has_json_fields;
 
                         $multi = ((isset($info['has_multilingual']) && $info['has_multilingual']));
       
@@ -2351,7 +2353,8 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                             $this_db_table_base = $this->__get_table_for_field($db_field_base, $table);
 
                             $select .= ($select ? ', ' : '').
-                                       "IF(`$this_db_table`.`$db_field`!='', `$this_db_table`.`$db_field`, `$this_db_table_base`.`$db_field_base`) as `$field_name`";
+                                       "IF(`$this_db_table`.`$db_field`!=''".($is_file ? " and `$this_db_table`.`$db_field`!='[]'" : '').
+                                       ", `$this_db_table`.`$db_field`, `$this_db_table_base`.`$db_field_base`) as `$field_name`";
 
                             if (!isset($tables_db[$this_db_table]))                                               $tables_db[$this_db_table]      = 1;
                             if ($this_db_table != $this_db_table_base && !isset($tables_db[$this_db_table_base])) $tables_db[$this_db_table_base] = 1;
@@ -2584,7 +2587,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                                         } else if ($schema[$field]['type'] == 'list') {
 
-                                            $res[$k][$field] = explode(',', $value);
+                                            $res[$k][$field] = preg_split('/\s*,\s*/', $value, -1, PREG_SPLIT_NO_EMPTY);
                                         }
                                     }
                                 }

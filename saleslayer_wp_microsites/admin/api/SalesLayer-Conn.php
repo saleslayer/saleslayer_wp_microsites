@@ -883,7 +883,8 @@ class SalesLayer_Conn
      * @return array
      *
      */
-    public function getResponseTableJoins($table = null) {
+    public function get_response_table_joins($table = null)
+    {
         if (null !== $this->response_tables_info and is_array($this->response_tables_info)) {
             if (null === $table) {
                 $list = [];
