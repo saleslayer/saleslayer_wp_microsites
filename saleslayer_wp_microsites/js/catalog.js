@@ -2,7 +2,10 @@ var baseURL= '',
 	serviceURL='call_api.php',
 	list_exclusion=[],
 	lastIdCategory=0,
-	slyr_cache=[];
+	slyr_cache=[],
+	field_cat_id = '',
+	field_cat_parent_id = '',
+	field_prd_id = '';
 
 list_exclusion.push('id');
 list_exclusion.push('parent_id');
@@ -32,18 +35,19 @@ function paintFastMenu(fastMenuArray, divElem) {
 
 	$.each( fastMenuArray, function( key, menuObj ) {
 		if(menuObj.hasOwnProperty('submenu')) {
+
 			var liAdd = '<li class="accordion-group" id="li_category_';
-			liAdd = liAdd.concat(menuObj.ID);
+			liAdd = liAdd.concat(menuObj[field_cat_id]);
 			liAdd = liAdd.concat('"><a class="accordion-toggle collapsed"  ');
-			var href = "#collapse_categories_"+menuObj.ID;
+			var href = "#collapse_categories_"+menuObj[field_cat_id];
 			if (typeof menuObj.category_url !== 'undefined') {
 				href = menuObj.category_url;
 			}
 			liAdd = liAdd.concat('data-parent="#menu_pr" href="'+href);
 			liAdd = liAdd.concat('" title="" data-original-title="Categorie_');
-			liAdd = liAdd.concat(menuObj.ID);
+			liAdd = liAdd.concat(menuObj[field_cat_id]);
 			liAdd = liAdd.concat('" onclick="loadCatalog(');
-			liAdd = liAdd.concat(menuObj.ID);
+			liAdd = liAdd.concat(menuObj[field_cat_id]);
 			liAdd = liAdd.concat('); return false;"><em>');
 			liAdd = liAdd.concat(menuObj.section_name);
 			liAdd = liAdd.concat('</em></a>');
@@ -51,11 +55,11 @@ function paintFastMenu(fastMenuArray, divElem) {
 			$("#" + divElem).append(liAdd);
 
 			var ulAdd = '<ul id="collapse_categories_';
-			ulAdd = ulAdd.concat(menuObj.ID);
+			ulAdd = ulAdd.concat(menuObj[field_cat_id]);
 			ulAdd = ulAdd.concat('" class="accordion-body collapse in" style="height: auto;"></ul>');
-			$("#li_category_" + menuObj.ID).append(ulAdd);
+			$("#li_category_" + menuObj[field_cat_id]).append(ulAdd);
 
-			paintFastMenu(menuObj.submenu, 'collapse_categories_' + menuObj.ID);
+			paintFastMenu(menuObj.submenu, 'collapse_categories_' + menuObj[field_cat_id]);
 		} else {
 			var liAdd = '<li class="accordion-group">';
 			var href = "#";
@@ -63,7 +67,7 @@ function paintFastMenu(fastMenuArray, divElem) {
 				href = menuObj.category_url;
 			}
 			liAdd = liAdd.concat('<a href="'+href+'" onclick="loadCatalog(');
-			liAdd = liAdd.concat(menuObj.ID);
+			liAdd = liAdd.concat(menuObj[field_cat_id]);
 			liAdd = liAdd.concat('); return false;"><em>');
 			liAdd = liAdd.concat(menuObj.section_name);
 			liAdd = liAdd.concat('</em></a></li>');
@@ -151,7 +155,7 @@ function update_url(type = 'categories', item_id){
 
 								var itemObj = itemArray[i];
 
-								if (itemObj.ID == item_id){
+								if (itemObj[field_cat_id] == item_id){
 									
 									if (typeof itemObj.category_url !== 'undefined') {
 
@@ -242,7 +246,7 @@ function paintCatalog(catalog) {
 			var divAdd = '<div class="box_elm not_thum">';
 			divAdd = divAdd.concat('<div class="box_img img_on">');
 			divAdd = divAdd.concat('<a href="'+href+'" onclick="loadCatalog(');
-			divAdd = divAdd.concat(categoryObj.ID);
+			divAdd = divAdd.concat(categoryObj[field_cat_id]);
 			divAdd = divAdd.concat('); return false;">');
 
 			if(categoryObj.hasOwnProperty('section_image') && categoryObj.section_image!='' && categoryObj.section_image!=null) {
@@ -255,7 +259,7 @@ function paintCatalog(catalog) {
 
 			divAdd = divAdd.concat('</a></div><div class="box_inf">');
 			divAdd = divAdd.concat('<h7><a class="section" href="'+href+'" onclick="loadCatalog(');
-			divAdd = divAdd.concat(categoryObj.ID);
+			divAdd = divAdd.concat(categoryObj[field_cat_id]);
 			divAdd = divAdd.concat('); return false;">');
 			divAdd = divAdd.concat(categoryObj.section_name);
 			divAdd = divAdd.concat('</a></h7></div></div>');
@@ -277,7 +281,7 @@ function paintCatalog(catalog) {
 			var divAdd = '<div class="box_elm not_thum ">';
 			divAdd = divAdd.concat('<div class="box_img img_on">');
 			divAdd = divAdd.concat('<a href="'+href+'" onclick="loadProduct(');
-			divAdd = divAdd.concat(productObj.ID);
+			divAdd = divAdd.concat(productObj[field_prd_id]);
 			divAdd = divAdd.concat('); return false;">');
 
 			if(productObj.hasOwnProperty('product_image') && productObj.product_image!="") {
@@ -290,7 +294,7 @@ function paintCatalog(catalog) {
 
 			divAdd = divAdd.concat('</a></div><div class="box_inf">');
 			divAdd = divAdd.concat('<h7><a href="'+href+'" class="product" onclick="loadProduct(');
-			divAdd = divAdd.concat(productObj.ID);
+			divAdd = divAdd.concat(productObj[field_prd_id]);
 			divAdd = divAdd.concat('); return false;">');
 			if (productObj.product_name) {
 				divAdd = divAdd.concat(productObj.product_name);
@@ -303,7 +307,7 @@ function paintCatalog(catalog) {
 		
 		last_crumb    =(catalog.breadcrumb != null) ? catalog.breadcrumb.length -1 : 0;
 		lastIdCategory=(last_crumb>=0 && typeof(catalog.breadcrumb[last_crumb])!='undefined') ?
-							((catalog.breadcrumb != null) ? catalog.breadcrumb[last_crumb].ID : 0) : 0;
+							((catalog.breadcrumb != null) ? catalog.breadcrumb[last_crumb][field_cat_id] : 0) : 0;
 	} 
 
 	if(no_elements) {
@@ -340,7 +344,7 @@ function paintBreadcrumb(breadcrumbArray) {
 			} else {
 				liAdd = liAdd.concat('<li><a href="'+href+'" onclick="loadCatalog(');
 			}
-			liAdd = liAdd.concat(breadcrumb.ID);
+			liAdd = liAdd.concat(breadcrumb[field_cat_id]);
 			liAdd = liAdd.concat('); return false;">')
 			liAdd = liAdd.concat(breadcrumb.section_name);
 			liAdd = liAdd.concat('</a></li>');
@@ -402,7 +406,7 @@ function backCatalog(catalog_id) {
 }
 
 function paintProduct(product) {
-
+	
 	$("#breadcrumb_ul").empty();
 	paintBreadcrumb(product.breadcrumb);
 
@@ -432,7 +436,7 @@ function paintProduct(product) {
 			$('#p_product_description').empty().append(options.product_description);
 			$('#p_characteristics')    .empty().append(options.characteristics);
 			$('#p_formats')    .empty().append(options.formats);
-			$('#backcatalog').attr("onclick","backCatalog('"+options.ID_CATALOG+"'); return false;");
+			$('#backcatalog').attr("onclick","backCatalog('"+options[field_cat_id]+"'); return false;");
 
 			if (options.hasOwnProperty('product_image') && options.product_image!='' && options.product_image!=null) {
 
@@ -554,6 +558,23 @@ function loadVars(){
 		baseURL = plugins_url+'/'+plugin_name_dir+'/';
 
 		$('.slyr_cat_prld').css('background', 'url('+baseURL+'images/loading.gif) center center no-repeat');
+
+	}
+
+	if (typeof field_cat_id !== 'undefined' || $field_cat_id === '' || typeof field_cat_parent_id !== 'undefined' || $field_cat_parent_id === '' || typeof field_prd_id !== 'undefined' || $field_prd_id === '' ){
+			
+		$.ajax({
+			type: 'POST',
+			url: baseURL+serviceURL,
+			data: { endpoint: 'tables_fields_ids'}
+		})
+		.done(function(result) {
+
+			field_cat_id 			= result.field_cat_id;
+			field_cat_parent_id 	= result.field_cat_parent_id;
+			field_prd_id  			= result.field_prd_id;
+			
+		});
 
 	}
 

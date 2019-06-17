@@ -178,7 +178,8 @@ class Softclear_API {
 					'value'    => $idCategory
 				),
 			);
-			$result = $this->updater->extract(self::slyr_catalog, $fields, $language, $conditions, 1);
+
+			$result = $this->updater->extract(self::slyr_catalog, $fields, $language, $conditions, 1, null, null, null, false, true, true);
 
 			if ($this->debug_on) $this->debug("get_catalog($idCategory) DB catalog result: ".print_r($result, 1));
 
@@ -209,7 +210,7 @@ class Softclear_API {
 		$arrayReturn               = array();
 		$arrayReturn['breadcrumb'] = $breadcrumb;
 		
-		$result = $this->updater->extract(self::slyr_catalog, $fields, $language, $conditions, 1);
+		$result = $this->updater->extract(self::slyr_catalog, $fields, $language, $conditions, 1, null, null, null, false, true, true);
 
 		if ($this->debug_on) $this->debug("get_catalog($idCategory) DB catalog childs result: ".print_r($result, 1));
 
@@ -245,7 +246,7 @@ class Softclear_API {
 			),
 		);
 		
-		$result = $this->updater->extract(self::slyr_products, $fields, $language, $conditions, 1);
+		$result = $this->updater->extract(self::slyr_products, $fields, $language, $conditions, 1, null, null, null, false, true, true);
 
 		if ($this->debug_on) $this->debug("get_catalog($idCategory) DB product result: ".print_r($result, 1));
 
@@ -278,15 +279,15 @@ class Softclear_API {
 
 				foreach ($arrayReturn["breadcrumb"] as $keyARB => $ar_breadcrumb) {
 					
-					$arrayReturn["breadcrumb"][$keyARB]['category_url'] = $page_url.'c'.$ar_breadcrumb['ID'].'/'.sanitize_title($ar_breadcrumb['section_name']).'/';
+					$arrayReturn["breadcrumb"][$keyARB]['category_url'] = $page_url.'c'.$ar_breadcrumb[$field_cat_id].'/'.sanitize_title($ar_breadcrumb['section_name']).'/';
 					
 					if ($ar_breadcrumb[$field_cat_parent_id] == 0) {
 
-						$arrayReturn["breadcrumb"][$keyARB]['category_path_display'] = array($ar_breadcrumb['ID']);
-						if ($idCategory == $ar_breadcrumb['ID']){ 
-							$arrayReturn['categories_display'] = array_unique(array_merge($arrayReturn['categories_display'],array($ar_breadcrumb['ID']))); 
+						$arrayReturn["breadcrumb"][$keyARB]['category_path_display'] = array($ar_breadcrumb[$field_cat_id]);
+						if ($idCategory == $ar_breadcrumb[$field_cat_id]){ 
+							$arrayReturn['categories_display'] = array_unique(array_merge($arrayReturn['categories_display'],array($ar_breadcrumb[$field_cat_id]))); 
 						}
-						$arrayReturn["breadcrumb"][$keyARB]['category_path'] = $page_url.$ar_breadcrumb['ID'].'/'.sanitize_title($ar_breadcrumb['section_name']);
+						$arrayReturn["breadcrumb"][$keyARB]['category_path'] = $page_url.$ar_breadcrumb[$field_cat_id].'/'.sanitize_title($ar_breadcrumb['section_name']);
 						
 					} else {
 
@@ -302,17 +303,17 @@ class Softclear_API {
 
 								foreach ($breadcrumb as $keyB => $bc) {
 									
-									if ($bc['ID'] == $ar_breadcrumb['ID']) continue;
-									if ($bc['ID'] == $prev_parent) {
+									if ($bc[$field_cat_id] == $ar_breadcrumb[$field_cat_id]) continue;
+									if ($bc[$field_cat_id] == $prev_parent) {
 
 										$counter = 0;
 										if ($path == '') {
 											
-											$path = $bc['ID'].'/'; 
+											$path = $bc[$field_cat_id].'/'; 
 											
 										} else {
 
-											$path = $bc['ID'].'/'.$path; 
+											$path = $bc[$field_cat_id].'/'.$path; 
 										}
 					
 										if ($bc[$field_cat_parent_id] == 0){
@@ -336,11 +337,11 @@ class Softclear_API {
 							} while ($prev_parent != 0);
 						}
 
-						$arrayReturn["breadcrumb"][$keyARB]['category_path_display'] = explode('/', $path.$ar_breadcrumb['ID']);
-						if ($idCategory == $ar_breadcrumb['ID']){ 
-							$arrayReturn['categories_display'] = array_unique(array_merge($arrayReturn['categories_display'],explode('/', $path.$ar_breadcrumb['ID']))); 
+						$arrayReturn["breadcrumb"][$keyARB]['category_path_display'] = explode('/', $path.$ar_breadcrumb[$field_cat_id]);
+						if ($idCategory == $ar_breadcrumb[$field_cat_id]){ 
+							$arrayReturn['categories_display'] = array_unique(array_merge($arrayReturn['categories_display'],explode('/', $path.$ar_breadcrumb[$field_cat_id]))); 
 						}
-						$arrayReturn["breadcrumb"][$keyARB]['category_path'] .= $path.$ar_breadcrumb['ID'].'/'.sanitize_title($ar_breadcrumb['section_name']);
+						$arrayReturn["breadcrumb"][$keyARB]['category_path'] .= $path.$ar_breadcrumb[$field_cat_id].'/'.sanitize_title($ar_breadcrumb['section_name']);
 					
 					}	
 				}
@@ -350,15 +351,15 @@ class Softclear_API {
 
 				foreach ($arrayReturn["categories"] as $keyARC => $category) {
 					
-					$arrayReturn["categories"][$keyARC]['category_url'] = $page_url.'c'.$category['ID'].'/'.sanitize_title($category['section_name']).'/';
+					$arrayReturn["categories"][$keyARC]['category_url'] = $page_url.'c'.$category[$field_cat_id].'/'.sanitize_title($category['section_name']).'/';
 				
 					if ($category[$field_cat_parent_id] == 0){
 
-						$arrayReturn["categories"][$keyARC]['category_path_display'] = array($category['ID']);
-						if ($idCategory == $category['ID']){ 
-							$arrayReturn['categories_display'] = array_unique(array_merge($arrayReturn['categories_display'],array($category['ID']))); 
+						$arrayReturn["categories"][$keyARC]['category_path_display'] = array($category[$field_cat_id]);
+						if ($idCategory == $category[$field_cat_id]){ 
+							$arrayReturn['categories_display'] = array_unique(array_merge($arrayReturn['categories_display'],array($category[$field_cat_id]))); 
 						}
-						$arrayReturn["categories"][$keyARC]['category_path'] = $page_url.$category['ID'].'/'.sanitize_title($category['section_name']);
+						$arrayReturn["categories"][$keyARC]['category_path'] = $page_url.$category[$field_cat_id].'/'.sanitize_title($category['section_name']);
 
 					} else {
 
@@ -374,26 +375,26 @@ class Softclear_API {
 
 								foreach ($breadcrumb as $keyB => $bc) {
 									
-									if ($bc['ID'] == $prev_parent) {
+									if ($bc[$field_cat_id] == $prev_parent) {
 
 										$counter = 0;
 
 										if ($path == '') {
 											
-											$path = $bc['ID'].'/'; 
+											$path = $bc[$field_cat_id].'/'; 
 											
 										} else {
 
-											$path = $bc['ID'].'/'.$path; 
+											$path = $bc[$field_cat_id].'/'.$path; 
 										}
 
-										if ($bc['catalogue_parent_id'] == 0){
+										if ($bc[$field_cat_parent_id] == 0){
 
 											break 2;
 
 										} else {
 
-											$prev_parent = $bc['catalogue_parent_id'];
+											$prev_parent = $bc[$field_cat_parent_id];
 										}
 									}
 								}
@@ -405,11 +406,11 @@ class Softclear_API {
 							} while ($prev_parent != 0);
 						}
 
-						$arrayReturn["categories"][$keyARC]['category_path_display'] = explode('/', $path.$category['ID']);
-						if ($idCategory == $category['ID']){
-							$arrayReturn['categories_display'] = array_unique(array_merge($arrayReturn['categories_display'],explode('/', $path.$category['ID'])));
+						$arrayReturn["categories"][$keyARC]['category_path_display'] = explode('/', $path.$category[$field_cat_id]);
+						if ($idCategory == $category[$field_cat_id]){
+							$arrayReturn['categories_display'] = array_unique(array_merge($arrayReturn['categories_display'],explode('/', $path.$category[$field_cat_id])));
 						}
-						$arrayReturn["categories"][$keyARC]['category_path'] .= $path.$category['ID'].'/'.sanitize_title($category['section_name']);
+						$arrayReturn["categories"][$keyARC]['category_path'] .= $path.$category[$field_cat_id].'/'.sanitize_title($category['section_name']);
 
 					}
 				}
@@ -419,7 +420,7 @@ class Softclear_API {
 
 				foreach ($arrayReturn["products"] as $keyARP => $product) {
 					
-					$arrayReturn["products"][$keyARP]['product_url'] = $page_url.'p'.$product['ID'].'/'.sanitize_title($product['product_name']).'/';
+					$arrayReturn["products"][$keyARP]['product_url'] = $page_url.'p'.$product[$field_prd_id].'/'.sanitize_title($product['product_name']).'/';
 				}
 			}
 		}
@@ -443,7 +444,7 @@ class Softclear_API {
 		$field_prd_id = $this->updater->get_db_field_ID(self::slyr_products);
 		$field_cat_id = $this->updater->get_db_field_ID(self::slyr_catalog);
 
-		$fields     = array($field_prd_id, 'product_name', 'product_image', 'product_description', 'characteristics', 'formats', 'ID_CATALOG' => $field_cat_id);
+		$fields     = array($field_prd_id, 'product_name', 'product_image', 'product_description', 'characteristics', 'formats', $field_cat_id);
 		$conditions = array(
 			array(
 				'field'    => $field_prd_id,
@@ -453,7 +454,7 @@ class Softclear_API {
 		);
 		
         $language = $this->updater->get_default_language();
-		$result   = $this->updater->extract(self::slyr_products, $fields, $language, $conditions, 1, null, null, null, false, false, true);
+		$result   = $this->updater->extract(self::slyr_products, $fields, $language, $conditions, 1, null, null, null, false, true, true);
 
 		if ($this->debug_on) $this->debug("get_product_detail($idProduct) DB result: ".print_r($result, 1));
 
@@ -470,7 +471,7 @@ class Softclear_API {
 				
 				foreach ($result as $product) {
 
-					$breadcrumb = self::get_breadcrumb($product['ID_CATALOG']);
+					$breadcrumb = self::get_breadcrumb($product[$field_cat_id]);
 
 					if (!empty($breadcrumb)){
 
@@ -486,7 +487,7 @@ class Softclear_API {
 
 								foreach ($arrayReturn['breadcrumb'] as $arbc) {
 
-									if ($bc['ID'] == $arbc['ID']) {
+									if ($bc[$field_cat_id] == $arbc[$field_cat_id]) {
 
 										$bc_found = true;
 										break;
@@ -500,18 +501,22 @@ class Softclear_API {
 						}
 					}
 					
-					$product['orig_ID'] = $product['ID'];
-	                $product['ID']     .= '_'.$product['__conn_id__'];
+					$product['orig_ID'] = $product[$field_prd_id];
+	                $product[$field_prd_id]     .= '_'.$product['__conn_id__'];
 
 					unset($product['__con_id__']);
 
-	                $schema = $this->updater->get_database_table_schema(self::slyr_products);
+	                $schema = $this->updater->get_database_table_schema(self::slyr_products, true);
 
 					$DETAIL_ID = '';
 
 					if (isset($schema['product_image']['image_sizes'])) {
 						foreach (array_keys($schema['product_image']['image_sizes']) as $i) {
-							if (!in_array($i, array('TH', 'THM'))) { $DETAIL_ID = $i; break; }
+
+							if (!in_array($i, array('TH', 'THM'))) { 
+								$DETAIL_ID = $i; 
+								break; 
+							}
 						}
 					}
 
@@ -563,7 +568,7 @@ class Softclear_API {
 			),
 		);
 		
-		$result = $this->updater->extract(self::slyr_catalog, $fields, $language, $conditions, 1);
+		$result = $this->updater->extract(self::slyr_catalog, $fields, $language, $conditions, 1, null, null, null, false, true, true);
 
 		if ($this->debug_on) $this->debug("get_breadcrumb($idCategory) DB result: ".print_r($result, 1));
 
@@ -574,9 +579,9 @@ class Softclear_API {
 		$breadcrumb = array();
 		if (is_array($result)) {
 			foreach ($result as &$row) {
-				$catalog_parent_id = intval($row['ID_PARENT']);
+				$catalog_parent_id = intval($row[$field_cat_parent_id]);
 				if($catalog_parent_id > 0) {
-					$breadcrumb_rec = self::get_breadcrumb($row['ID_PARENT']);
+					$breadcrumb_rec = self::get_breadcrumb($row[$field_cat_parent_id]);
 					foreach ($breadcrumb_rec as $row_rec) {
 						$breadcrumb[] = $row_rec;
 					}
@@ -613,7 +618,7 @@ class Softclear_API {
 				'value'    => $idParent)
 		);
 
-		$result = $this->updater->extract(self::slyr_catalog, $fields, $language, $conditions, 1);
+		$result = $this->updater->extract(self::slyr_catalog, $fields, $language, $conditions, 1, null, null, null, false, true, true);
 
 		if ($this->debug_on) $this->debug("get_fast_menu($idParent) DB result: ".print_r($result, 1));
 
@@ -626,10 +631,10 @@ class Softclear_API {
 
 		if (is_array($result)) {
 			foreach ($result as $row) {
-				$fast_menu_rec = self::get_fast_menu($row['ID'], $page_url);
+				$fast_menu_rec = self::get_fast_menu($row[$field_cat_id], $page_url);
 				if (count($fast_menu_rec) > 0) { $row['submenu'] = $fast_menu_rec; }
 				if ($page_url != ''){
-					$row['category_url'] = $page_url.'c'.$row['ID'].'/'.sanitize_title($row['section_name']).'/';
+					$row['category_url'] = $page_url.'c'.$row[$field_cat_id].'/'.sanitize_title($row['section_name']).'/';
 				}
 				$fast_menu[] = $row;
 			}
@@ -680,6 +685,7 @@ class Softclear_API {
 		$return       = 0;
 		self::connect_saleslayer();
 		$language     = $this->updater->get_default_language();
+		$field_cat_id = $this->updater->get_db_field_ID(self::slyr_catalog);
 		$field_prd_id = $this->updater->get_db_field_ID(self::slyr_products);
 	
 		$fields         = array($field_prd_id, 'product_name');
@@ -702,13 +708,13 @@ class Softclear_API {
 			}
 		}
 
-		$result = $this->updater->extract(self::slyr_products, $fields, $language, $conditions, 1);
+		$result = $this->updater->extract(self::slyr_products, $fields, $language, $conditions, 1, null, null, null, false, true, true);
 
 		if ($this->debug_on) $this->debug("search_item($search_value) DB products result: ".print_r($result, 1));
 
 		if (!empty($result)) {
 
-			$return = json_encode(array('type' => 'p', 'id' => $result[0]['ID'], 'name' => $result[0]['product_name']));
+			$return = json_encode(array('type' => 'p', 'id' => $result[0][$field_prd_id], 'name' => $result[0]['product_name']));
 
 		} else {
 
@@ -732,18 +738,71 @@ class Softclear_API {
 				}
 			}
 
-			$result = $this->updater->extract(self::slyr_catalog, $fields, $language, $conditions, 1);
+			$result = $this->updater->extract(self::slyr_catalog, $fields, $language, $conditions, 1, null, null, null, false, true, true);
 
 			if ($this->debug_on) $this->debug("search_item($search_value) DB catalog result: ".print_r($result, 1));
 
 			if (!empty($result)) {
 
-				$return = json_encode(array('type' => 'c', 'id' => $result[0]['ID'], 'name' => $result[0]['section_name']));
+				$return = json_encode(array('type' => 'c', 'id' => $result[0][$field_cat_id], 'name' => $result[0]['section_name']));
 			}
 		}
 
 		if ($this->debug_on) $this->debug("search_item($search_value) return: ".print_r($return, 1));
 
 		return $return;
+
 	}
+
+	/**
+	 * Returns tables fields ids
+	 * 
+	 * @return array containing tables fields ids
+	 */
+	public function get_tables_fields_ids($field = null){ 
+
+		self::connect_saleslayer();
+
+		if (is_null($field)){
+
+			$fields_ids = array();
+
+			$fields_ids['field_cat_id'] 		= $this->updater->get_db_field_ID(self::slyr_catalog);
+			$fields_ids['field_cat_parent_id'] 	= $this->updater->get_db_field_parent_ID(self::slyr_catalog);
+			$fields_ids['field_prd_id'] 		= $this->updater->get_db_field_ID(self::slyr_products);
+		
+			return $fields_ids;
+
+		}else{
+
+			switch ($field) {
+
+				case 'field_cat_id':
+
+					return $this->updater->get_db_field_ID(self::slyr_catalog);
+					break;
+				
+				case 'field_cat_parent_id':
+
+					return $this->updater->get_db_field_parent_ID(self::slyr_catalog);
+					break;
+					
+				case 'field_prd_id':
+
+					return $this->updater->get_db_field_ID(self::slyr_products);
+					break;
+
+				default:
+
+					if ($this->debug_on) $this->debug("## Error. get_tables_fields_ids() - Not valid field: ".print_r($field, 1));
+					break;
+
+			}
+
+		}
+
+		return false;
+
+	}
+
 }

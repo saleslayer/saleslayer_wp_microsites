@@ -37,7 +37,7 @@ if(isset($_POST['endpoint'])) {
 	}
 
 	$apiSC = new Softclear_API();
-	
+
 	switch ($endpoint) {
 
 		case 'menu':
@@ -73,6 +73,12 @@ if(isset($_POST['endpoint'])) {
 			$search_value = (isset($_POST['search_value'])) ? addslashes($_POST['search_value']) : 0;
 			
 			$return = $apiSC->search_item($search_value);
+
+			break;
+
+		case 'tables_fields_ids':
+
+			$return = json_encode($apiSC->get_tables_fields_ids());
 
 			break;
 

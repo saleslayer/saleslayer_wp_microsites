@@ -261,10 +261,12 @@ function slyr_catalog(){
                 if ($type == 'c'){
 
                     if (is_array($return) && !empty($return) && isset($return['breadcrumb']) && !empty($return['breadcrumb'])){
+                        
+                        $field_cat_id = $apiSC->get_tables_fields_ids('field_cat_id');
 
                         foreach ($return['breadcrumb'] as $keyBR => $breadcrumb) {
                             
-                            if ($breadcrumb['ID'] == $item_id){
+                            if ($breadcrumb[$field_cat_id] == $item_id){
 
                                 if (isset($breadcrumb['category_url']) && $breadcrumb['category_url'] != ''){
 
@@ -327,6 +329,9 @@ add_shortcode(SLYR_short_code, 'slyr_catalog');
 
 function prepare_html_data($type, $data){
 
+    $apiSC = new Softclear_API();
+    $field_cat_id = $apiSC->get_tables_fields_ids('field_cat_id');
+
     $baseURL = plugins_url().'/'.PLUGIN_NAME_DIR.'/';
     
     $return_data = array();
@@ -341,7 +346,7 @@ function prepare_html_data($type, $data){
 
             ($breadcrumb == end($data['breadcrumb'])) ? $breadcrumb_class = ' class="active"' : $breadcrumb_class = '';
             
-            $breadcrumb_html .= '<li'.$breadcrumb_class.'><a href="'.$breadcrumb_href.'" onclick="loadCatalog('.$breadcrumb['ID'].'); return false;">'.$breadcrumb['section_name'].'</a></li>';
+            $breadcrumb_html .= '<li'.$breadcrumb_class.'><a href="'.$breadcrumb_href.'" onclick="loadCatalog('.$breadcrumb[$field_cat_id].'); return false;">'.$breadcrumb['section_name'].'</a></li>';
             
         }
 
@@ -363,7 +368,7 @@ function prepare_html_data($type, $data){
 
                 (isset($category['category_url']) && $category['category_url'] != '') ? $category_href = $category['category_url'] : $category_href = '#';
                 
-                $categories_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.$category_href.'" onclick="loadCatalog('.$category['ID'].'); return false;">';
+                $categories_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.$category_href.'" onclick="loadCatalog('.$category[$field_cat_id].'); return false;">';
 
                 if (isset($category['section_image'])){
 
@@ -383,7 +388,7 @@ function prepare_html_data($type, $data){
 
                 }
 
-                $categories_html .= '</a></div><div class="box_inf"><h7><a class="section" href="'.$category_href.'" onclick="loadCatalog('.$category['ID'].'); return false;">'.$category['section_name'].'</a></h7></div></div>';
+                $categories_html .= '</a></div><div class="box_inf"><h7><a class="section" href="'.$category_href.'" onclick="loadCatalog('.$category[$field_cat_id].'); return false;">'.$category['section_name'].'</a></h7></div></div>';
 
             }
 
@@ -468,7 +473,7 @@ function prepare_html_data($type, $data){
                 $return_data['product']['product_name'] = $product['product_name'];
                 $return_data['product']['p_characteristics'] = $product['characteristics'];
                 $return_data['product']['p_formats'] = $product['formats'];
-                $return_data['product']['catalogue_id'] = $product['catalogue_id'];
+                $return_data['product'][$field_cat_id] = $product[$field_cat_id];
 
                 if (isset($product['product_image']) && is_array($product['product_image']) && !empty($product['product_image'])){
 
