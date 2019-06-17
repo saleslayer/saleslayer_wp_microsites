@@ -330,7 +330,9 @@ add_shortcode(SLYR_short_code, 'slyr_catalog');
 function prepare_html_data($type, $data){
 
     $apiSC = new Softclear_API();
-    $field_cat_id = $apiSC->get_tables_fields_ids('field_cat_id');
+    $tables_fields_ids = $apiSC->get_tables_fields_ids();
+    $field_cat_id = $tables_fields_ids['field_cat_id'];
+    $field_prd_id = $tables_fields_ids['field_prd_id'];
 
     $baseURL = plugins_url().'/'.PLUGIN_NAME_DIR.'/';
     
@@ -406,7 +408,7 @@ function prepare_html_data($type, $data){
 
                 (isset($product['product_url']) && $product['product_url'] != '') ? $product_href = $product['product_url'] : $product_href = '#';
                 
-                $products_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.$product_href.'" onclick="loadProduct('.$product['ID'].'); return false;">';
+                $products_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.$product_href.'" onclick="loadProduct('.$product[$field_prd_id].'); return false;">';
 
                 if (isset($product['product_image'])){
 
@@ -428,7 +430,7 @@ function prepare_html_data($type, $data){
 
                 (isset($product['product_name']) && $product['product_name'] && !is_null($product['product_name'])) ? $product_name = $product['product_name'] : $product_name = 'Product Undefined';
 
-                $products_html .= '</a></div><div class="box_inf"><h7><a class="product" href="'.$product_href.'" onclick="loadProduct('.$product['ID'].'); return false;">'.$product_name.'</a></h7></div></div>';
+                $products_html .= '</a></div><div class="box_inf"><h7><a class="product" href="'.$product_href.'" onclick="loadProduct('.$product[$field_prd_id].'); return false;">'.$product_name.'</a></h7></div></div>';
 
             }
 

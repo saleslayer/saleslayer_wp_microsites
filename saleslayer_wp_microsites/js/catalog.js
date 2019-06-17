@@ -154,7 +154,6 @@ function update_url(type = 'categories', item_id){
 							for (var i = 0; i<slyr_cache[cache_idx][item_id][index].length; i++){
 
 								var itemObj = itemArray[i];
-
 								if (itemObj[field_cat_id] == item_id){
 									
 									if (typeof itemObj.category_url !== 'undefined') {
@@ -322,7 +321,7 @@ function paintCatalog(catalog) {
 }
 
 function paintBreadcrumb(breadcrumbArray) {
-	
+
 	var liAdd = '<li><a href="#" onclick="loadCatalog(0); return false;">Start</a></li>';
 	$("#breadcrumb_ul").append(liAdd);
 
@@ -406,7 +405,7 @@ function backCatalog(catalog_id) {
 }
 
 function paintProduct(product) {
-	
+
 	$("#breadcrumb_ul").empty();
 	paintBreadcrumb(product.breadcrumb);
 
@@ -552,7 +551,6 @@ function check_slyr_page_params(){
 
 function loadVars(){
 	
-
 	if (typeof plugins_url !== 'undefined' && typeof plugin_name_dir !== 'undefined'){
 
 		baseURL = plugins_url+'/'+plugin_name_dir+'/';
@@ -561,27 +559,28 @@ function loadVars(){
 
 	}
 
-	if (typeof field_cat_id !== 'undefined' || $field_cat_id === '' || typeof field_cat_parent_id !== 'undefined' || $field_cat_parent_id === '' || typeof field_prd_id !== 'undefined' || $field_prd_id === '' ){
+	if (typeof field_cat_id === 'undefined' || field_cat_id === '' || typeof field_cat_parent_id === 'undefined' || field_cat_parent_id === '' || typeof field_prd_id === 'undefined' || field_prd_id === '' ){
 			
 		$.ajax({
 			type: 'POST',
 			url: baseURL+serviceURL,
 			data: { endpoint: 'tables_fields_ids'}
 		})
-		.done(function(result) {
+		.done(function(tables_fields_ids) {
 
-			field_cat_id 			= result.field_cat_id;
-			field_cat_parent_id 	= result.field_cat_parent_id;
-			field_prd_id  			= result.field_prd_id;
+			field_cat_id 			= tables_fields_ids.field_cat_id;
+			field_cat_parent_id 	= tables_fields_ids.field_cat_parent_id;
+			field_prd_id  			= tables_fields_ids.field_prd_id;
 			
-		});
+			load_content();
 
+		});
+		
 	}
 
 }
-$(document).ready(function(){
 
-	loadVars();
+function load_content(){
 
 	if (typeof baseURL !== 'undefined' && baseURL != '') {
 
@@ -600,7 +599,7 @@ $(document).ready(function(){
 			}
 
 		}
-	
+
 		Shadowbox.init();
 
 		$( "#sl_search" ).submit(function( event ) {
@@ -644,6 +643,12 @@ $(document).ready(function(){
 		});
 
 	}
+
+}
+
+$(document).ready(function(){
+
+	loadVars();
 
 });
 
