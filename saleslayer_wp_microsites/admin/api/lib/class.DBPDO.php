@@ -8,6 +8,8 @@
  * @version 1.0
  *
  */
+if (! Defined ('ABSPATH')) exit;
+
 class slyr_SQL {
 
     public $error = null;
