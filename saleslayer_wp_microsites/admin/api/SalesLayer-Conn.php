@@ -13,6 +13,7 @@
  *
  * @version 1.29
  */
+if (! Defined ('ABSPATH')) exit;
 class SalesLayer_Conn 
 {
 
