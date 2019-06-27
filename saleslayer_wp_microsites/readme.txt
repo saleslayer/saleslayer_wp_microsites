@@ -45,9 +45,9 @@ SEO optimizations, stability and security
 
 == Screenshots ==
 
-1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/develop/images/screenshot-1.png
-1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/develop/images/screenshot-2.png
-1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/develop/images/screenshot-3.png
-1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/develop/images/screenshot-4.png
+1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/master/images/screenshot-1.png
+1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/master/images/screenshot-2.png
+1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/master/images/screenshot-3.png
+1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/master/images/screenshot-4.png
 
 
