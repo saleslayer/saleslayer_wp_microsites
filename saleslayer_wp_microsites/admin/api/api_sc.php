@@ -25,10 +25,10 @@ if (!class_exists('SalesLayer_Updater')) {
 
 class Softclear_API
 {
-    public const slyr_connector_id = SLYR_connector_id;
-    public const slyr_connector_key = SLYR_connector_key;
-    public const slyr_catalog = 'catalogue';
-    public const slyr_products = 'products';
+    const slyr_connector_id = SLYR_connector_id;
+    const slyr_connector_key = SLYR_connector_key;
+    const slyr_catalog = 'catalogue';
+    const slyr_products = 'products';
     public $debug_on = false;
     public $debug_filepath;
     public $slyr_updater_table_prefix;
