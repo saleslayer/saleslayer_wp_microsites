@@ -312,6 +312,9 @@ class SalesLayer_Conn
     public function get_info($last_update = null, $params = null, $connector_type = null, $add_reference_files = false)
     {
         if ($this->hasConnector()) {
+
+            $api_url = $this->__get_api_url($last_update);
+     
             if ($this->time_unlimit) {
                 set_time_limit(0);
             }
@@ -322,48 +325,28 @@ class SalesLayer_Conn
                 ignore_user_abort(true);
             }
 
-            $ch = curl_init($this->__get_api_url($last_update));
+            if (is_array($params) && !empty($params)) {
 
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1800); // 30 minutes * 60 seconds
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                // $params = array('body' => json_encode($params));
+                $params = array('body' => $params);
+                $wp_remote = wp_remote_post( $api_url, $params );
+            
+            }else{
 
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                $wp_remote = wp_remote_get( $api_url );
 
-            if ($this->SSL && $this->SSL_Cert) {
-                curl_setopt($ch, CURLOPT_PORT, 443);
-                curl_setopt($ch, CURLOPT_SSLCERT, $this->SSL_Cert);
-                curl_setopt($ch, CURLOPT_SSLKEY, $this->SSL_Key);
-                curl_setopt($ch, CURLOPT_CAINFO, $this->SSL_CACert);
             }
 
-            if ($add_reference_files) {
-                if (!is_array($params)) {
-                    $params = [];
-                }
-                $params['get_file_refereneces'] = 1;
-            }
+            $wp_body = wp_remote_retrieve_body( $wp_remote );
+            $wp_response_code = wp_remote_retrieve_response_code( $wp_remote );
+            
+            if ($wp_body !== false && $wp_response_code >= 200 && $wp_response_code < 300){
 
-            if (is_array($params)) {
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
-
-                if (isset($params['compression']) && $params['compression']) {
-                    curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
-                }
-            }
-
-            $response = curl_exec($ch);
-
-            if (false !== $response) {
-                $this->data_returned = json_decode(preg_replace('/^\xef\xbb\xbf/', '', $response), 1);
-
-                curl_close($ch);
+                $this->data_returned = json_decode(preg_replace('/^\xef\xbb\xbf/', '', $wp_body), 1);
 
                 if (false !== $this->data_returned && is_array($this->data_returned)) {
 
-                    unset($response);
+                    unset($wp_body);
 
                     if ($connector_type
                         && isset($this->data_returned['schema']['connector_type'])
@@ -379,15 +362,16 @@ class SalesLayer_Conn
                     }
 
                 } else {
-                    $this->__trigger_error('Void response or malformed: ' . $response, 101);
+
+                    $this->__trigger_error('Void response or malformed: ' . $wp_body, 101);
                 }
 
-            } else {
+            }else{
 
-                $this->__trigger_error('Error connection: ' . curl_error($ch), 102);
+                $this->__trigger_error('Error connection: ' . wp_remote_retrieve_response_message( $wp_remote ), 102);
 
-                curl_close($ch);
             }
+
         }
 
         return false;
@@ -562,91 +546,6 @@ class SalesLayer_Conn
                 }
 
                 return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Set info to API.
-     *
-     * @param array $update_items items data to insert/update
-     * @param array $delete_items items data to delete
-     * @param bool  $compression  gzip compression transfer
-     *
-     * @return response to API
-     */
-    public function set_info($update_items = array(), $delete_items = array(), $compression = false)
-    {
-        $data = array();
-
-        if ($this->hasConnector()) {
-            if (is_array($update_items) and count($update_items)) {
-                $data['input_data'] = array();
-
-                foreach ($update_items as $table => &$items) {
-                    if (is_array($items) and count($items)) {
-                        $data['input_data'][$table] = $items;
-                    }
-                }
-            }
-
-            if (is_array($delete_items) and count($delete_items)) {
-                $data['delete_data'] = array();
-
-                foreach ($update_items as $table => &$items) {
-                    if (is_array($items) and count($items)) {
-                        $data['delete_data'][$table] = $items;
-                    }
-                }
-            }
-
-            unset($update_items, $delete_items, $items);
-
-            if (count($data)) {
-                $ch = curl_init($this->__get_api_url());
-
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-
-                if ($this->SSL && $this->SSL_Cert) {
-                    curl_setopt($ch, CURLOPT_PORT, 443);
-
-                    curl_setopt($ch, CURLOPT_SSLCERT, $this->SSL_Cert);
-                    curl_setopt($ch, CURLOPT_SSLKEY, $this->SSL_Key);
-                    curl_setopt($ch, CURLOPT_CAINFO, $this->SSL_CACert);
-
-                }
-
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
-                if ($compression) {
-                    curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
-                }
-
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-                $response = curl_exec($ch);
-
-                if (false !== $response) {
-                    $response = @json_decode(preg_replace('/^\xef\xbb\xbf/', '', $response), 1);
-
-                    if (isset($response['input_response'])) {
-                        return $response['input_response'];
-                    }
-                    if (isset($response['error'])) {
-                        $this->__trigger_error('API error', $response['error']);
-                    } else {
-                        $this->__trigger_error('Void response or malformed: ' . $response, 101);
-                    }
-                } else {
-                    $this->__trigger_error('Error connection: ' . curl_error($ch), 102);
-                }
-
-                curl_close($ch);
             }
         }
 

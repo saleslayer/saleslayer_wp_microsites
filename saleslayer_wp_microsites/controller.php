@@ -94,7 +94,6 @@ function slyr_plugin_init()
 
     // 1. Create menu options list and hook them to the stylesheets and scripts
     add_action('admin_menu', 'slyr_menu', 1);
-
     update_option('SLYR_version', SLYR_version);
 
     global $wp, $wp_rewrite;
@@ -109,7 +108,7 @@ function slyr_plugin_init()
             // 2. Load styles and scripts
             add_action('wp_enqueue_scripts', 'slyr_enqueue_front_stylesheets', 1);
             add_action('wp_enqueue_scripts', 'slyr_enqueue_scripts', 1);
-            
+
             $wp->add_query_var('id');
 
             add_rewrite_rule(
@@ -205,8 +204,8 @@ function slyr_enqueue_scripts()
     );
 
     wp_localize_script(
-        'slyr_plugin_script_script',
-        'sl_ajax_object', //call_api.php
+            'slyr_plugin_script_script',
+            'sl_ajax_object', //call_api.php
         array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('sales_layer_nonce')
@@ -219,7 +218,6 @@ function sl_catalog_control()
     if (! wp_verify_nonce($_REQUEST['_ajax_nonce'], 'sales_layer_nonce')) {
         wp_die("Error - Invalid nonce verification  ✋");
     }
-
 
     if (isset($_POST['endpoint'])) {
         $endpoint = sanitize_text_field($_POST['endpoint']);
@@ -404,19 +402,20 @@ function slyr_catalog()
             }
 
             if (is_array($return) && !empty($return)) {
-                if ($type == 'c') {
-                    if (isset($return['breadcrumb']) && !empty($return['breadcrumb'])) {
-                        $field_cat_id = $apiSC->get_tables_fields_ids('field_cat_id');
+                
+                if (isset($return['breadcrumb']) && !empty($return['breadcrumb'])) {
+                    $field_cat_id = $apiSC->get_tables_fields_ids('field_cat_id');
 
-                        foreach ($return['breadcrumb'] as $keyBR => $breadcrumb) {
-                            if ($breadcrumb[$field_cat_id] == $item_id) {
-                                if (isset($breadcrumb['category_url']) && $breadcrumb['category_url'] != '') {
-                                    $preloaded_url = $breadcrumb['category_url'];
-                                }
+                    foreach ($return['breadcrumb'] as $keyBR => $breadcrumb) {
+                        if ($breadcrumb[$field_cat_id] == $item_id) {
+                            if (isset($breadcrumb['category_url']) && $breadcrumb['category_url'] != '') {
+                                $preloaded_url = $breadcrumb['category_url'];
                             }
                         }
                     }
-                } else {
+                }
+                
+                if ($type != 'c'){
                     if (isset($return['products']) && !empty($return['products'])) {
                         foreach ($return['products'] as $keyPR => $product) {
                             if ($product['orig_ID'] == $item_id) {
@@ -484,11 +483,13 @@ function prepare_html_data($type, $data)
         $breadcrumb_html = '<li><a href="#" onclick="loadCatalog(0); return false;">Start</a></li>';
 
         foreach ($data['breadcrumb'] as $keyBR => $breadcrumb) {
-            (isset($breadcrumb['product_url']) && $breadcrumb['product_url'] != '') ? $breadcrumb_href = $breadcrumb['product_url'] : $breadcrumb_href = '#';
+
+            (isset($breadcrumb['category_url']) && $breadcrumb['category_url'] != '') ? $breadcrumb_href = $breadcrumb['category_url'] : $breadcrumb_href = '#';
 
             ($breadcrumb == end($data['breadcrumb'])) ? $breadcrumb_class = ' class="active"' : $breadcrumb_class = '';
 
-            $breadcrumb_html .= '<li'.$breadcrumb_class.'><a href="'.esc_attr($breadcrumb_href).'" onclick="loadCatalog('.esc_js($breadcrumb[$field_cat_id]).') return false;">'.esc_html($breadcrumb['section_name']).'</a></li>';
+            $breadcrumb_html .= '<li'.$breadcrumb_class.'><a href="'.esc_attr($breadcrumb_href).'" onclick="loadCatalog('.esc_js($breadcrumb[$field_cat_id]).'); return false;">'.esc_html($breadcrumb['section_name']).'</a></li>';
+
         }
 
         $return_data['breadcrumb'] = $breadcrumb_html;
@@ -505,7 +506,7 @@ function prepare_html_data($type, $data)
             foreach ($data['categories'] as $keyCAT => $category) {
                 (isset($category['category_url']) && $category['category_url'] != '') ? $category_href = $category['category_url'] : $category_href = '#';
 
-                $categories_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.esc_attr($category_href).'" onclick="loadCatalog('.esc_js($category[$field_cat_id]).') return false;">';
+                $categories_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.esc_attr($category_href).'" onclick="loadCatalog('.esc_js($category[$field_cat_id]).'); return false;">';
 
                 if (isset($category['section_image'])) {
                     if (is_array($category['section_image']) && !empty($category['section_image'])) {
@@ -519,7 +520,7 @@ function prepare_html_data($type, $data)
                     $categories_html .= '<img src="'.$baseURL.'images/placeholder.gif" alt="">';
                 }
 
-                $categories_html .= '</a></div><div class="box_inf"><h7><a class="section" href="'.esc_attr($category_href).'" onclick="loadCatalog('.esc_js($category[$field_cat_id]).') return false;">'.esc_html($category['section_name']).'</a></h7></div></div>';
+                $categories_html .= '</a></div><div class="box_inf"><h7><a class="section" href="'.esc_attr($category_href).'" onclick="loadCatalog('.esc_js($category[$field_cat_id]).'); return false;">'.esc_html($category['section_name']).'</a></h7></div></div>';
             }
 
             $return_data['categories'] = $categories_html;
@@ -533,7 +534,7 @@ function prepare_html_data($type, $data)
             foreach ($data['products'] as $keyPROD => $product) {
                 (isset($product['product_url']) && $product['product_url'] != '') ? $product_href = $product['product_url'] : $product_href = '#';
                 (isset($product['product_name']) && $product['product_name'] && $product['product_name'] !== null) ? $product_name = esc_html($product['product_name']) : $product_name = 'Product Undefined';
-                $products_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.esc_attr($product_href).'" onclick="loadProduct('.esc_js($product[$field_prd_id]).') return false;">';
+                $products_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.esc_attr($product_href).'" onclick="loadProduct('.esc_js($product[$field_prd_id]).'); return false;">';
 
                 if (isset($product['product_image'])) {
                     if (is_array($product['product_image']) && !empty($product['product_image'])) {
@@ -547,7 +548,7 @@ function prepare_html_data($type, $data)
                     $products_html .= '<img src="'.$baseURL.'images/placeholder.gif" alt="">';
                 }
 
-                $products_html .= '</a></div><div class="box_inf"><h7><a class="product" href="'.esc_attr($product_href).'" onclick="loadProduct('.esc_js($product[$field_prd_id]).') return false;">'.esc_html($product_name).'</a></h7></div></div>';
+                $products_html .= '</a></div><div class="box_inf"><h7><a class="product" href="'.esc_attr($product_href).'" onclick="loadProduct('.esc_js($product[$field_prd_id]).'); return false;">'.esc_html($product_name).'</a></h7></div></div>';
             }
 
             $return_data['products'] = $products_html;

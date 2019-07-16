@@ -5,7 +5,7 @@ if (!Defined('ABSPATH')) {
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-require_once SLYR__PLUGIN_DIR.'../../../wp-config.php';
+
 require_once SLYR__PLUGIN_DIR.'admin/SlPlugin.class.php';
 
 check_admin_referer();
@@ -13,7 +13,6 @@ check_admin_referer();
 if (!current_user_can('administrator')) {
     die('There are insufficient permissions to enter here. Have you logged in?');
 }
-
 
 $backend = new SlPlugin();
 $importOk = false;

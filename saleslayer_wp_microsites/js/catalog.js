@@ -38,8 +38,8 @@ function loadFastMenu() {
             _ajax_nonce: sl_ajax_object.nonce
         }
     }).done(function (result) {
-            paintFastMenu(result, 'collapse_catalog_1');
-        });
+        paintFastMenu(result, 'collapse_catalog_1');
+    });
 }
 
 function paintFastMenu(fastMenuArray, divElem) {
