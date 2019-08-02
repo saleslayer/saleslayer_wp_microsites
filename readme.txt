@@ -6,6 +6,7 @@ Requires PHP: 5.6
 Stable tag: 5.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
+Tags: pim, automation, catalog management, product management, content management, microsites, synchronization
 
 A simple and easy way to set up a website that shows your product catalog with all the information that you want in minutes!
 
@@ -32,6 +33,10 @@ Create a page, or edit an existing one, and add the Sales Layer short-code to th
 
 == Frequently Asked Questions ==
 
+= Why I am getting a "There is no new information to synchronize" message when synchronizing? =
+
+Since your last synchronization, there has been no modifications.
+Congratulations! Your catalogue is up to date.
 
 == Upgrade Notice ==
 
@@ -45,9 +50,9 @@ SEO optimizations, stability and security
 
 == Screenshots ==
 
-1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/master/images/screenshot-1.png
-1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/master/images/screenshot-2.png
-1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/master/images/screenshot-3.png
-1. https://raw.githubusercontent.com/saleslayer/Sales_Layer_Wordpress/master/images/screenshot-4.png
+1. https://raw.githubusercontent.com/saleslayer/saleslayer_wp_microsites/master/images/screenshot-1.png
+1. https://raw.githubusercontent.com/saleslayer/saleslayer_wp_microsites/master/images/screenshot-2.png
+1. https://raw.githubusercontent.com/saleslayer/saleslayer_wp_microsites/master/images/screenshot-3.png
+1. https://raw.githubusercontent.com/saleslayer/saleslayer_wp_microsites/master/images/screenshot-4.png
 
 

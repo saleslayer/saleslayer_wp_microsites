@@ -37,7 +37,6 @@ Sales Layer plugin allows you to easily synchronize your catalogue information w
 <p>
     <h2>Requirements for synchronization</h2>
     <ul>
-        <li>cUrl extension installed; In order to call and obtain the information from Sales Layer.</li>
         <li>Define the fields relationship in the Sales Layer Wordpress connector:
             <ul>
                 <li>Product attributes and variants will be set in the Sales Layer Wordpress connector characteristics and formats fields respectively.</li>

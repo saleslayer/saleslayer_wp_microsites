@@ -85,7 +85,6 @@ class SalesLayer_Conn
      */
     public function __construct($codeConn = null, $secretKey = null, $SSL = true, $url = false, $forceuft8 = true)
     {
-        if ($this->__has_system_requirements()) {
             if (true == $forceuft8) {
                 ini_set('default_charset', 'utf-8');
             }
@@ -96,23 +95,6 @@ class SalesLayer_Conn
 
             $this->set_SSL_connection($SSL);
             $this->set_URL_connection($url);
-        }
-    }
-
-    /**
-     * Test system requirements.
-     *
-     * @return bool
-     */
-    private function __has_system_requirements()
-    {
-        if (!extension_loaded('curl')) {
-            $this->__trigger_error('Missing PHP curl extension', 100);
-
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -300,7 +282,7 @@ class SalesLayer_Conn
     }
 
     /**
-     * CURL Request to retrieve information.
+     * Request to retrieve information.
      *
      * @param timestamp $last_update         last updated database
      * @param array     $params              extra parameters for the API

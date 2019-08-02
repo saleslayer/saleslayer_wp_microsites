@@ -8,8 +8,6 @@ if (session_status() == PHP_SESSION_NONE) {
 
 require_once SLYR__PLUGIN_DIR.'admin/SlPlugin.class.php';
 
-check_admin_referer();
-
 if (!current_user_can('administrator')) {
     die('There are insufficient permissions to enter here. Have you logged in?');
 }
@@ -24,9 +22,7 @@ if (($slyr_conn_id = get_option(SLYR_connector_id) and $_SESSION['slyr']['last_s
 
     unset($_GET['action']);
 }
- $script = '<script type="text/javascript">
-                var plugin_name_dir = \''.esc_attr(PLUGIN_NAME_DIR).'\';
-            </script>';
+ $script = 'var plugin_name_dir = \''.esc_attr(PLUGIN_NAME_DIR).'\';';
 
 wp_register_script('config_name', '');
 wp_enqueue_script('config_name');

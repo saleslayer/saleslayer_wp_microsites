@@ -1,16 +1,17 @@
 1. Modify commented controller.php header
 
 /*
-Plugin Name: Sales Layer
-Plugin URI: http://saleslayer.com/
-Description: Sales Layer connector.
-Version: 1.6
+Plugin Name: Sales Layer WP Microsites
+Plugin URI: https://github.com/saleslayer/saleslayer_wp_microsites
+Description: Sales Layer microsites connector.
+Version: 1.7
 Author: Sales Layer
-Author URI: http://www.cloud.saleslayer.com/
-License: A "Slug" license name e.g. GPL2
+Author URI: http://saleslayer.com/
+License: GPLv3
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 */
 
-2. Modify settings.php
+2. Modify settings.php (SLYR_name, SLYR_name_icon, SLYR_name_logo)
 
 3. Modify readme.txt
 

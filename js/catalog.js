@@ -52,7 +52,7 @@ function paintFastMenu(fastMenuArray, divElem) {
             liAdd = liAdd.concat('"><a class="accordion-toggle collapsed"  ');
             var href = "#collapse_categories_" + menuObj[field_cat_id];
             if (typeof menuObj.category_url !== 'undefined') {
-                href = menuObj.category_url;
+                href = htmlEntities(menuObj.category_url);
             }
             liAdd = liAdd.concat('data-parent="#menu_pr" href="' + href);
             liAdd = liAdd.concat('" title="' + menuObj.section_name + '" data-original-title="Categorie_');
@@ -75,7 +75,7 @@ function paintFastMenu(fastMenuArray, divElem) {
             var liAdd = '<li class="accordion-group">';
             var href = "#";
             if (typeof menuObj.category_url !== 'undefined') {
-                href = menuObj.category_url;
+                href = htmlEntities(menuObj.category_url);
             }
             liAdd = liAdd.concat('<a href="' + href + '" onclick="loadCatalog(');
             liAdd = liAdd.concat(menuObj[field_cat_id]);
@@ -221,7 +221,7 @@ function update_url(type = 'categories', item_id) {
 
     if (url_to_update != '') {
 
-        window.history.pushState({}, null, url_to_update);
+        window.history.pushState({}, null, htmlEntities(url_to_update));
 
     }
 
@@ -234,6 +234,12 @@ function slyr_scrollTop() {
 
     if (o > t) $('html').scrollTop(t);
 
+}
+
+function htmlEntities(encodedString) {
+    var textArea = document.createElement('textarea');
+    textArea.innerHTML = encodedString;
+    return textArea.value;
 }
 
 function paintCatalog(catalog) {
@@ -255,7 +261,7 @@ function paintCatalog(catalog) {
             var categoryObj = categoryArray[i];
             var href = "#";
             if (typeof categoryObj.category_url !== 'undefined') {
-                href = categoryObj.category_url;
+                href = htmlEntities(categoryObj.category_url);
             }
 
             var divAdd = '<div class="box_elm not_thum">';
@@ -290,7 +296,7 @@ function paintCatalog(catalog) {
             var productObj = productArray[i];
             var href = "#";
             if (typeof productObj.product_url !== 'undefined') {
-                href = productObj.product_url;
+                href = htmlEntities(productObj.product_url);
             }
 
             var divAdd = '<div class="box_elm not_thum ">';
@@ -350,7 +356,7 @@ function paintBreadcrumb(breadcrumbArray) {
             var liAdd = '';
             var href = "#";
             if (typeof breadcrumb.category_url !== 'undefined') {
-                href = breadcrumb.category_url;
+                href = htmlEntities(breadcrumb.category_url);
             }
 
             //si es el ultimo elemento...
@@ -541,21 +547,20 @@ function check_slyr_page_params() {
     var item_id;
     if (exploded_pathname.length > 0) {
 
-        if (exploded_pathname[2] == relativeUrl) {
+        if (exploded_pathname[exploded_pathname.length - 2] == relativeUrl) {
 
-            if (typeof exploded_pathname[3] !== 'undefined' && exploded_pathname[3] != '') {
+            if (typeof exploded_pathname[exploded_pathname.length - 1] !== 'undefined' && exploded_pathname[3] != '') {
 
-                var type = exploded_pathname[3].substr(0, 1);
+                var type = exploded_pathname[exploded_pathname.length - 1].substr(0, 1);
                 if (type == 'c') {
-
                     url_has_item = true;
-                    item_id = exploded_pathname[3].substr(1, exploded_pathname[3].length);
+                    item_id = exploded_pathname[exploded_pathname.length - 1].substr(1, exploded_pathname[exploded_pathname.length - 1].length);
                     loadCatalog(item_id);
 
                 } else if (type == 'p') {
 
                     url_has_item = true;
-                    item_id = exploded_pathname[3].substr(1, exploded_pathname[3].length);
+                    item_id = exploded_pathname[exploded_pathname.length - 1].substr(1, exploded_pathname[exploded_pathname.length - 1].length);
                     loadProduct(item_id);
 
                 }
@@ -585,20 +590,22 @@ function loadVars() {
     }
 
     if (typeof field_cat_id === 'undefined' || field_cat_id === '' || typeof field_cat_parent_id === 'undefined' || field_cat_parent_id === '' || typeof field_prd_id === 'undefined' || field_prd_id === '') {
-
-        $.ajax({
-            type: 'post',
+        
+        jQuery.post({
             url:sl_ajax_object.ajax_url,
             data: {
                 action:'sl_catalog_control',
                 endpoint: 'tables_fields_ids',
                _ajax_nonce: sl_ajax_object.nonce
-                  }
-        }).done(function (tables_fields_ids) {
+            }
+            ,success: function (tables_fields_ids) {
                 field_cat_id = tables_fields_ids.field_cat_id;
                 field_cat_parent_id = tables_fields_ids.field_cat_parent_id;
                 field_prd_id = tables_fields_ids.field_prd_id;
                 load_content();
+            },error: function( jqXHR,  textStatus,  errorThrown){
+                console.log(errorThrown);
+            }
         });
 
     }
@@ -606,7 +613,6 @@ function loadVars() {
 }
 
 function load_content() {
-
     if (typeof sl_ajax_object.ajax_url !== 'undefined' && sl_ajax_object.ajax_url != '') {
 
         loadFastMenu();
@@ -619,7 +625,7 @@ function load_content() {
 
             if (preloaded_url != '') {
 
-                window.history.pushState({}, null, preloaded_url);
+                window.history.pushState({}, null, htmlEntities(preloaded_url));
 
             }
 

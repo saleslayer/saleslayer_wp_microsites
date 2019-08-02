@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Sales Layer WP Microsites
-Plugin URI: https://github.com/saleslayer/Sales_Layer_Wordpress
+Plugin URI: https://github.com/saleslayer/saleslayer_wp_microsites
 Description: Sales Layer microsites connector.
 Version: 1.7
 Author: Sales Layer
@@ -98,33 +98,83 @@ function slyr_plugin_init()
 
     global $wp, $wp_rewrite;
 
-    $exploded_request_uri = explode('/', $_SERVER['REQUEST_URI']);
-    if (!empty($exploded_request_uri) && isset($exploded_request_uri[2])) {
-        $check_sql = "SELECT post_name FROM $wpdb->posts WHERE post_name = %s AND post_type = 'page' AND post_content like '%[saleslayer_catalog]%'  LIMIT 1";
-        $post_check = $wpdb->get_var($wpdb->prepare($check_sql, $exploded_request_uri[2]));
+    if(isset($_GET['page_id']) && !empty($_GET['page_id']) && (int) $_GET['page_id'] > 0){
+        $index = ' ID = %s AND';
+        $value_to_search = (int) $_GET['page_id'];
+    }else if(isset($_SERVER['PATH_INFO']) && !empty($_SERVER['PATH_INFO'])){
+        $extract = explode( '/', sanitize_text_field($_SERVER['PATH_INFO']));
+        foreach($extract as $url_key => $url_params){
+            if(empty($url_params)){
+                unset($extract[$url_key]);
+           }
+        }
+        $value_to_search = reset($extract);
+        $index = ' post_name = %s  AND';
+    }else if(isset($_SERVER['REQUEST_URI']) && !empty($_SERVER['REQUEST_URI'])){
+        $extract = explode( '/', sanitize_text_field($_SERVER['REQUEST_URI']));
+        $homeurl= explode('/',sanitize_text_field(home_url()));
+        foreach($extract as $url_key => $url_params){
+            if(empty($url_params)||in_array($url_params,$homeurl,false)){
+                unset($extract[$url_key]);
+            }
+        }
+        $value_to_search = reset($extract);
+        $index = ' post_name = %s  AND';
+    }else if(isset($_GET['p']) && !empty($_GET['p']) && (int) $_GET['p'] > 0 ){
+        $index = ' ID = %s AND ';
+        $value_to_search = (int) $_GET['page_id'];
+    }else{
+        $index = '';
+        $value_to_search = '';
+    }
 
-        if (!empty($post_check)) {
+    $check_sql = "SELECT ID, post_name FROM $wpdb->posts WHERE ".$index." post_type = 'page' AND post_content like '%[saleslayer_catalog]%'  LIMIT 1";
+
+    $prepared = $wpdb->prepare($check_sql,$value_to_search);
+    $post_check = $wpdb->get_row($prepared);
+
+    if (!empty($post_check)) {
+
+        // if ( '' !== get_option( 'permalink_structure' ) ) {
+
+            $post_check = json_decode(json_encode($post_check), True);
 
             // 2. Load styles and scripts
             add_action('wp_enqueue_scripts', 'slyr_enqueue_front_stylesheets', 1);
             add_action('wp_enqueue_scripts', 'slyr_enqueue_scripts', 1);
 
             $wp->add_query_var('id');
-
+            if(isset($_GET) && !empty($_GET)){
+                $existing = array('pagename','id');
+                foreach($_GET as $name_get => $get_value ){
+                    if(!in_array($name_get,$existing,false)){
+                        $existing[] = $name_get;
+                        $wp->add_query_var($name_get);
+                    }
+                }
+            }
+               
             add_rewrite_rule(
-                $exploded_request_uri[2].'/([^/]*)',
-                'index.php?pagename='.$exploded_request_uri[2].'&id=$matches[1]',
+                $post_check['post_name'].'/([^/]*)',
+                'index.php?pagename='.$post_check['post_name'].'&id=$matches[1]',
                 'top'
             );
-        }
+            add_rewrite_rule(
+                'index.php\/'.$post_check['post_name'].'\/.*',
+                'index.php?pagename='.$post_check['post_name'].'&id=$matches[1]',
+                'top'
+            );
+            
+        // }
+
     }
 
     $wp_rewrite->flush_rules();
+
 }
 
 register_activation_hook(__FILE__, 'slyr_activate');
 add_action('init', 'slyr_plugin_init');
-
 
 add_action('init', 'slreload_init');
 function slreload_init()
@@ -216,27 +266,23 @@ function slyr_enqueue_scripts()
 function sl_catalog_control()
 {
     if (! wp_verify_nonce($_REQUEST['_ajax_nonce'], 'sales_layer_nonce')) {
-        wp_die("Error - Invalid nonce verification  ✋");
+        wp_die( 'Error - Invalid nonce verification  ✋' );
     }
 
     if (isset($_POST['endpoint'])) {
         $endpoint = sanitize_text_field($_POST['endpoint']);
         $return = null;
 
-        $page_permalink = '';
-
         if (isset($_POST['web_url'])) {
-            $url_params = explode('/', str_replace(home_url().'/', '', esc_url_raw($_POST['web_url'])));
-
-            if (isset($url_params[0]) && !empty($url_params[0])) {
-                $page_permalink = $url_params[0];
-            }
+            $page_url  =  esc_url_raw($_POST['web_url']);
+        }else{
+            $page_url = $_SERVER['HTTP_REFERER'];
         }
 
-        $page_url = '';
-
-        if ($page_permalink != '') {
-            $page_url = home_url().'/'.$page_permalink.'/';
+        if(preg_match('/page_id=|p=/',$page_url)){
+            $type_url = 'get';
+        }else{
+            $type_url = 'post';
         }
 
         $apiSC = new Softclear_API();
@@ -245,7 +291,7 @@ function sl_catalog_control()
 
             case 'menu':
 
-                $return = $apiSC->get_fast_menu(0, $page_url);
+                $return = $apiSC->get_fast_menu(0, $page_url, $type_url);
 
                 break;
 
@@ -253,7 +299,7 @@ function sl_catalog_control()
 
                 $id = isset($_POST['id']) ? sanitize_text_field($_POST['id']) : 0;
 
-                $return = $apiSC->get_catalog($id, $page_url);
+                $return = $apiSC->get_catalog($id, $page_url, $type_url);
 
                 break;
 
@@ -261,7 +307,7 @@ function sl_catalog_control()
 
                 $id = isset($_POST['id']) ? sanitize_text_field($_POST['id']) : 0;
 
-                $return = $apiSC->get_product_detail($id, $page_url);
+                $return = $apiSC->get_product_detail($id, $page_url, $type_url);
 
                 break;
 
@@ -351,7 +397,6 @@ function slyr_how_to_start()
     echo '<div id="howto">'.$howto.'</div>';
 }
 
-
 function slyr_config_page()
 {
     if (!current_user_can('manage_options')) {
@@ -363,6 +408,7 @@ function slyr_config_page()
 
 function slyr_catalog()
 {
+
     global $wpdb;
 
     $result = $wpdb->query("SHOW TABLES LIKE 'slyr_catalogue'");
@@ -371,83 +417,142 @@ function slyr_catalog()
     }
 
     if ($result) {
-        //global $wp_rewrite;
 
-        $relativeslug = str_replace(home_url(), '', get_permalink());
-        $relativeurl = trim($relativeslug, '/');
+        // if ( '' == get_option( 'permalink_structure' ) ) {
 
-        global $wp;
-        $return = [];
-        $current_home_url = esc_url_raw(home_url($wp->request));
-        $exploded_home_url = explode('/', $current_home_url);
-        $current_home_url = $exploded_home_url[0].'/'.$exploded_home_url[1].'/'.$exploded_home_url[2].'/'.$exploded_home_url[3].'/'.$exploded_home_url[4];
-        $slyr_page_home_url = $current_home_url.'/';
+        //     return '<div class="notice notice-error"><h4> Permalink Structure Error </h4><p/>'.
+        //             'A custom url or permalink structure is required for this plugin to work correctly. Contact a site admin so they can go to the Permalinks Options Page and configure the permalinks.</p>'.
+        //             '</div>'.
+        //             '<script type="text/javascript"> var plugins_url = "'.plugins_url().'"; var plugin_name_dir = "'.PLUGIN_NAME_DIR.'"; </script>';
 
-        $print_data = $preloaded_url = '';
+        // }else{
 
-        if ($exploded_home_url[4] == $relativeurl && isset($exploded_home_url[5]) && $exploded_home_url[5] != '') {
-            $type = strtolower(substr($exploded_home_url[5], 0, 1));
-
+            global $wp;
+            $return = [];
+            $current_home_url =  wp_get_canonical_url();
+            $type = null;
             $item_id = '';
-            $apiSC = new Softclear_API();
+            $exploded_home_url = explode('/', $current_home_url);
+            
+            $slyr_page_home_url = $current_home_url;
+            $print_data = $preloaded_url = '';
 
-            if ($type == 'c') {
-                $item_id = substr($exploded_home_url[5], 1, strlen($exploded_home_url[5]));
-                $return = $apiSC->get_catalog($item_id, $slyr_page_home_url);
-            } else {
-                if ($type == 'p') {
-                    $item_id = substr($exploded_home_url[5], 1, strlen($exploded_home_url[5]));
-                    $return = $apiSC->get_product_detail($item_id, $slyr_page_home_url);
-                }
+            // clear content after check content after homeurl and after url
+            $clear = false;
+            foreach($exploded_home_url as $url_key => $url_arg){
+                    if(!$clear && $url_arg == $wp->query_vars['pagename']){
+                        $clear = true;
+                        unset($exploded_home_url[$url_key]);
+                        break;
+                    }else{ // elimina posible index.php y todas alternativas que se pueden poner antes del nombre asignado de la pagina
+                        unset($exploded_home_url[$url_key]);
+                    }
+            }
+            $cleared_values = array();
+            //reorganize values cleared after post_name
+            foreach($exploded_home_url as $url_value){
+                $cleared_values[] = $url_value;
             }
 
-            if (is_array($return) && !empty($return)) {
-                
-                if (isset($return['breadcrumb']) && !empty($return['breadcrumb'])) {
-                    $field_cat_id = $apiSC->get_tables_fields_ids('field_cat_id');
-
-                    foreach ($return['breadcrumb'] as $keyBR => $breadcrumb) {
-                        if ($breadcrumb[$field_cat_id] == $item_id) {
-                            if (isset($breadcrumb['category_url']) && $breadcrumb['category_url'] != '') {
-                                $preloaded_url = $breadcrumb['category_url'];
-                            }
+            //check values
+            if(isset($wp->query_vars['id']) && !empty($wp->query_vars['id']) ){
+                $type = sanitize_text_field(strtolower(substr($wp->query_vars['id'], 0, 1)));
+                $item_id = (int) substr($wp->query_vars['id'], 1, strlen($wp->query_vars['id']));
+            }elseif( isset($_SERVER['PATH_INFO']) && !empty($_SERVER['PATH_INFO'])){
+                $arr_path = explode('/',sanitize_text_field($_SERVER['PATH_INFO']));
+                if(!empty($arr_path)){
+                    $is_name = false;
+                    foreach($arr_path as $url_key => $url_value){
+                        if(empty($url_value)){
+                            unset($arr_path[$url_key]);
+                            continue;
+                        }
+                        if( $url_value == $wp->query_vars['pagename']){
+                            $is_name = true;
+                            unset($arr_path[$url_key]);
+                            break;
                         }
                     }
                 }
+                $type = sanitize_text_field(strtolower(substr(reset($arr_path), 0, 1)));
+                $item_id = (int) substr(reset($arr_path), 1, strlen(reset($arr_path)));
+            }elseif( isset($_GET['elm']) && $_GET['elm'] != '' ){
+                $type = sanitize_text_field($_GET['elm']);
+                $item_id = (int) sanitize_text_field($_GET['idelm']);
+            }elseif( isset($wp->query_vars['amp;elm']) && $wp->query_vars['amp;elm'] != ''){
+                $type = sanitize_text_field($wp->query_vars['amp;elm']);
+                $item_id = (int) sanitize_text_field($wp->query_vars['amp;idelm']);
+            }
+
+            $relativeurl = $slyr_page_home_url.implode('/',$cleared_values).'/';
+
+            if(preg_match('/page_id=|p=/',$slyr_page_home_url)){
+                $type_url = 'get';
+            }else{
+                $type_url = 'post';
+            }
+
+            if ( $type != null && $item_id != '' ) {
+
+                $apiSC = new Softclear_API();
+                if ($type == 'c' ) {
+                    $return = $apiSC->get_catalog($item_id, $slyr_page_home_url,$type_url);
+                } else {
+                    if ($type == 'p' ) {
+                        $return = $apiSC->get_product_detail($item_id, $slyr_page_home_url,$type_url);
+                    }
+                }
                 
-                if ($type != 'c'){
-                    if (isset($return['products']) && !empty($return['products'])) {
-                        foreach ($return['products'] as $keyPR => $product) {
-                            if ($product['orig_ID'] == $item_id) {
-                                if (isset($product['product_url']) && $product['product_url'] != '') {
-                                    $preloaded_url = $product['product_url'];
-                                    break;
+
+                if (is_array($return) && !empty($return)) {
+                    
+                    if (isset($return['breadcrumb']) && !empty($return['breadcrumb'])) {
+                        $field_cat_id = $apiSC->get_tables_fields_ids('field_cat_id');
+
+                        foreach ($return['breadcrumb'] as $keyBR => $breadcrumb) {
+                            if ($breadcrumb[$field_cat_id] == $item_id) {
+                                if (isset($breadcrumb['category_url']) && $breadcrumb['category_url'] != '') {
+                                    $preloaded_url = $breadcrumb['category_url'];
                                 }
                             }
                         }
                     }
+                    
+                    if ($type != 'c'){
+                        if (isset($return['products']) && !empty($return['products'])) {
+                            foreach ($return['products'] as $keyPR => $product) {
+                                if ($product['orig_ID'] == $item_id) {
+                                    if (isset($product['product_url']) && $product['product_url'] != '') {
+                                        $preloaded_url = $product['product_url'];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    $print_data = prepare_html_data($type, $return);
                 }
-
-                $print_data = prepare_html_data($type, $return);
             }
-        }
+             
+            $script = 'var plugins_url = \''.esc_attr(plugins_url()).'\';
+                        var plugin_name_dir =  \''.esc_attr(PLUGIN_NAME_DIR).'\';
+                        var slyr_page_home_url =  \''.esc_attr($slyr_page_home_url).'\';
+                        var relativeUrl = \''.esc_attr($relativeurl).'\';
+                        var preloaded_info =   \''.(is_array($print_data) && !empty($print_data) ? '1' : '0').'\';
+                        var preloaded_url =   \''.esc_attr($preloaded_url).'\';
+                ';
 
-        $script = 'var plugins_url = \''.esc_attr(plugins_url()).'\';
-                    var plugin_name_dir =  \''.esc_attr(PLUGIN_NAME_DIR).'\';
-                    var slyr_page_home_url =  \''.esc_attr($slyr_page_home_url).'\';
-                    var relativeUrl = \''.esc_attr($relativeurl).'\';
-                    var preloaded_info =   \''.(is_array($print_data) && !empty($print_data) ? '1' : '0').'\';
-                    var preloaded_url =   \''.esc_attr($preloaded_url).'\';
-            ';
+            wp_register_script('declarations', '');
+            wp_enqueue_script('declarations');
+            wp_add_inline_script('declarations', $script);
+            ob_start();
+            require_once SLYR__PLUGIN_DIR.'catalog.php';
+            $catalog = ob_get_clean();
 
-        wp_register_script('declarations', '');
-        wp_enqueue_script('declarations');
-        wp_add_inline_script('declarations', $script);
-        ob_start();
-        require_once SLYR__PLUGIN_DIR.'catalog.php';
-        $catalog = ob_get_clean();
+            return '<div id="catalog">'.$catalog.'</div>';
+        // }
 
-        return '<div id="catalog">'.$catalog.'</div>';
     } else {
         return '<div id="catalog"><b>There are no products available right now.</b></div>'.
             '<script type="text/javascript"> var plugins_url = "'.plugins_url().'"; var plugin_name_dir = "'.PLUGIN_NAME_DIR.'"; </script>';
@@ -616,7 +721,6 @@ function prepare_html_data($type, $data)
                             } else {
                                 $gallery_html .= '<img id="preview" src="'.esc_attr($image['THM']).'" alt=""></div>';
                             }
-
 
                             $div_image_preview_finished = true;
                         }

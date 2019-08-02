@@ -2,7 +2,6 @@
 if (! Defined('ABSPATH')) {
     exit;
 }
-check_admin_referer();
 if (!current_user_can('administrator')) {
     die('There are insufficient permissions to enter here. Have you logged in?');
 }

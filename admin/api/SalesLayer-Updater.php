@@ -257,10 +257,6 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                 self::__trigger_error ('Missing PHP MySQL extension', 103);
             }
 
-        } else if (!extension_loaded('CURL')) {
-
-            self::__trigger_error ('Missing CURL extension', 106);
-
         } else {
 
             return true;
