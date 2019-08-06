@@ -5,7 +5,8 @@ var slyrmc_base_url = '',
     slyrmc_cache = [],
     slyrmc_field_cat_id = '',
     slyrmc_field_cat_parent_id = '',
-    slyrmc_field_prd_id = '';
+    slyrmc_field_prd_id = '',
+    slyrmc_info = 0;
 
 list_exclusion.push('id');
 list_exclusion.push('parent_id');
@@ -612,7 +613,7 @@ function slyrmc_load_vars() {
 
 function slyrmc_load_content() {
     
-    if (typeof sl_ajax_object.ajax_url !== 'undefined' && sl_ajax_object.ajax_url != '') {
+    if (typeof sl_ajax_object.ajax_url !== 'undefined' && sl_ajax_object.ajax_url != '' && slyrmc_info !== 0) {
 
         slyrmc_load_fast_menu();
 

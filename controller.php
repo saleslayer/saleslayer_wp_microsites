@@ -541,6 +541,7 @@ function slyrmc_catalog()
                         var slyrmc_relative_url = \''.esc_attr($relativeurl).'\';
                         var preloaded_info =   \''.(is_array($print_data) && !empty($print_data) ? '1' : '0').'\';
                         var preloaded_url =   \''.esc_attr($preloaded_url).'\';
+                        var slyrmc_info = 1;
                 ';
 
             wp_register_script('declarations', '');
@@ -555,7 +556,12 @@ function slyrmc_catalog()
 
     } else {
         return '<div id="slyr_catalogue"><b>There are no products available right now.</b></div>'.
-            '<script type="text/javascript"> var plugins_url = "'.plugins_url().'"; var slyrmc_plugin_name_dir = "'.SLYRMC_PLUGIN_NAME_DIR.'"; </script>';
+            '<script type="text/javascript"> var plugins_url = "'.plugins_url().'"; 
+            var slyrmc_plugin_name_dir = "'.SLYRMC_PLUGIN_NAME_DIR.'"; 
+            var slyrmc_page_home_url =  "";
+            var preloaded_info = 0;
+            var slyrmc_info = 0;
+            </script>';
     }
 }
 
