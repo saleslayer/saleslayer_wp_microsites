@@ -18,34 +18,34 @@ if (PHP_SESSION_NONE === session_status()) {
     session_start();
 }
 
-if (!defined('SLYR__PLUGIN_DIR')) {
-    define('SLYR__PLUGIN_DIR', plugin_dir_path(__FILE__));
+if (!defined('SLYRMC_PLUGIN_DIR')) {
+    define('SLYRMC_PLUGIN_DIR', plugin_dir_path(__FILE__));
 }
 
-require_once SLYR__PLUGIN_DIR.'settings.php';
+require_once SLYRMC_PLUGIN_DIR.'settings.php';
 
-if (!class_exists('Softclear_API')) {
-    require_once SLYR__PLUGIN_DIR.'admin/api/api_sc.php';
+if (!class_exists('SLYRMC_Softclear_API')) {
+    require_once SLYRMC_PLUGIN_DIR.'admin/api/api_sc.php';
 }
 
-function slyr_activate()
+function slyrmc_activate()
 {
 //    Plugin activated, do not output anything here
 }
 
 //    Init
-function slyr_plugin_init()
+function slyrmc_plugin_init()
 {
     global $wpdb;
 
-    $ver = get_option('SLYR_version');
-    $token_sl = get_option('SLYR_unique_token');
+    $ver = get_option('SLYRMC_version');
+    $token_sl = get_option('SLYRMC_unique_token');
 
     if (!$token_sl) {
-        add_option('SLYR_unique_token', hash('adler32', time().microtime(1).rand(0, 100)).hash('crc32b', time().rand(50, 250)));
+        add_option('SLYRMC_unique_token', hash('adler32', time().microtime(1).rand(0, 100)).hash('crc32b', time().rand(50, 250)));
     }
 
-    if ($ver < SLYR_version) {
+    if ($ver < SLYRMC_version) {
         $exist_conf = $wpdb->get_results('SHOW TABLES LIKE \'slyr___api_config\'');
 
         $conns = ($exist_conf ? $wpdb->get_results('select * where slyr___api_config') : array());
@@ -93,8 +93,8 @@ function slyr_plugin_init()
     }
 
     // 1. Create menu options list and hook them to the stylesheets and scripts
-    add_action('admin_menu', 'slyr_menu', 1);
-    update_option('SLYR_version', SLYR_version);
+    add_action('admin_menu', 'slyrmc_menu', 1);
+    update_option('SLYRMC_version', SLYRMC_version);
 
     global $wp, $wp_rewrite;
 
@@ -140,8 +140,8 @@ function slyr_plugin_init()
             $post_check = json_decode(json_encode($post_check), True);
 
             // 2. Load styles and scripts
-            add_action('wp_enqueue_scripts', 'slyr_enqueue_front_stylesheets', 1);
-            add_action('wp_enqueue_scripts', 'slyr_enqueue_scripts', 1);
+            add_action('wp_enqueue_scripts', 'slyrmc_enqueue_front_stylesheets', 1);
+            add_action('wp_enqueue_scripts', 'slyrmc_enqueue_scripts', 1);
 
             $wp->add_query_var('id');
             if(isset($_GET) && !empty($_GET)){
@@ -173,49 +173,49 @@ function slyr_plugin_init()
 
 }
 
-register_activation_hook(__FILE__, 'slyr_activate');
-add_action('init', 'slyr_plugin_init');
+register_activation_hook(__FILE__, 'slyrmc_activate');
+add_action('init', 'slyrmc_plugin_init');
 
-add_action('init', 'slreload_init');
-function slreload_init()
+add_action('init', 'slyrmc_reload_init');
+function slyrmc_reload_init()
 {
-    $token_sl = get_option('SLYR_unique_token');
-    add_rewrite_rule('^'.$token_sl.'$', 'index.php?slreload_stats='.$token_sl, 'top');
+    $token_sl = get_option('SLYRMC_unique_token');
+    add_rewrite_rule('^'.$token_sl.'$', 'index.php?slyrmc_reload_stats='.$token_sl, 'top');
 }
 
-add_action('query_vars', 'slreload_query_vars');
-function slreload_query_vars($query_vars)
+add_action('query_vars', 'slyrmc_reload_query_vars');
+function slyrmc_reload_query_vars($query_vars)
 {
-    $query_vars[] = 'slreload_stats';
+    $query_vars[] = 'slyrmc_reload_stats';
     return $query_vars;
 }
 
-add_action('parse_request', 'slreload_parse_request');
-function slreload_parse_request(&$wp)
+add_action('parse_request', 'slyrmc_reload_parse_request');
+function slyrmc_reload_parse_request(&$wp)
 {
-    if (array_key_exists('slreload_stats', $wp->query_vars)) {
+    if (array_key_exists('slyrmc_reload_stats', $wp->query_vars)) {
         require_once  dirname(__FILE__) . '/get_notices.php' ;
         exit();
     }
 }
 
-function slyr_enqueue_admin_stylesheets()
+function slyrmc_enqueue_admin_stylesheets()
 {
     if (is_admin()) {
-        wp_register_style('mystyle', plugin_dir_url(__FILE__).'css/style_admin.css');
-        wp_enqueue_style('mystyle');
+        wp_register_style('slyr_plugin_style_admin', plugin_dir_url(__FILE__).'css/style_admin.css');
+        wp_enqueue_style('slyr_plugin_style_admin');
     }
 }
 
-function slyr_enqueue_front_stylesheets()
+function slyrmc_enqueue_front_stylesheets()
 {
     if (!is_admin()) {
-        wp_register_style('mystyle', plugin_dir_url(__FILE__).'css/style.css', array(), 1);
-        wp_enqueue_style('mystyle');
+        wp_register_style('slyr_plugin_style', plugin_dir_url(__FILE__).'css/style.css', array(), 1);
+        wp_enqueue_style('slyr_plugin_style');
     }
 }
 
-function slyr_enqueue_scripts()
+function slyrmc_enqueue_scripts()
 {
     $scripts = array(
         'script',
@@ -242,7 +242,7 @@ function slyr_enqueue_scripts()
         );
     }
 
-    sl_special_inline_script();
+    slyrmc_special_inline_script();
 
     wp_localize_script(
         'slyr_plugin_script_catalog',
@@ -263,7 +263,7 @@ function slyr_enqueue_scripts()
     );
 }
 
-function sl_catalog_control()
+function slyrmc_catalog_control()
 {
     if (! wp_verify_nonce($_REQUEST['_ajax_nonce'], 'sales_layer_nonce')) {
         wp_die( 'Error - Invalid nonce verification  ✋' );
@@ -274,7 +274,7 @@ function sl_catalog_control()
         $return = null;
 
         if (isset($_POST['web_url'])) {
-            $page_url  =  esc_url_raw($_POST['web_url']);
+            $page_url = esc_url_raw($_POST['web_url']);
         }else{
             $page_url = $_SERVER['HTTP_REFERER'];
         }
@@ -285,7 +285,7 @@ function sl_catalog_control()
             $type_url = 'post';
         }
 
-        $apiSC = new Softclear_API();
+        $apiSC = new SLYRMC_Softclear_API();
 
         switch ($endpoint) {
 
@@ -341,72 +341,72 @@ function sl_catalog_control()
 }
 
 // Hook para usuarios no logueados
-add_action('wp_ajax_nopriv_sl_catalog_control', 'sl_catalog_control');
+add_action('wp_ajax_nopriv_slyrmc_catalog_control', 'slyrmc_catalog_control');
 // Hook para usuarios logueados
-add_action('wp_ajax_sl_catalog_control', 'sl_catalog_control');
+add_action('wp_ajax_slyrmc_catalog_control', 'slyrmc_catalog_control');
 
-add_action('wp_ajax_nopriv_sl_refresh_connector', 'sl_refresh_connector');
+add_action('wp_ajax_nopriv_slyrmc_refresh_connector', 'slyrmc_refresh_connector');
 
-function sl_refresh_connector()
+function slyrmc_refresh_connector()
 {
     exit();
 }
 
-function slyr_menu()
+function slyrmc_menu()
 {
     $menu_pages[] = add_menu_page(
-        SLYR_name.' Options',
-        SLYR_name,
+        SLYRMC_name.' Options',
+        SLYRMC_name,
         'manage_options',
-        'slyr_menu',
-        'slyr_how_to_start',
-        $icon_url = plugin_dir_url(__FILE__).'images/'.SLYR_name_icon
+        'slyrmc_menu',
+        'slyrmc_how_to_start',
+        $icon_url = plugin_dir_url(__FILE__).'images/'.SLYRMC_name_icon
     );
 
     $menu_pages[] = add_submenu_page(
-        'slyr_menu',
+        'slyrmc_menu',
         __('How to Start?'),
         __('How to Start?'),
         'manage_options',
-        'slyr_menu',
-        'slyr_how_to_start'
+        'slyrmc_menu',
+        'slyrmc_how_to_start'
     );
     $menu_pages[] = add_submenu_page(
-        'slyr_menu',
+        'slyrmc_menu',
         __('Configuration'),
         __('Configuration'),
         'manage_options',
-        'slyr_config',
-        'slyr_config_page'
+        'slyrmc_config',
+        'slyrmc_config_page'
     );
 
     //  Adding style to each menu
     foreach ($menu_pages as $page) {
-        add_action('admin_print_styles-'.$page, 'slyr_enqueue_admin_stylesheets', 1);
+        add_action('admin_print_styles-'.$page, 'slyrmc_enqueue_admin_stylesheets', 1);
     }
 }
 
-function slyr_how_to_start()
+function slyrmc_how_to_start()
 {
     if (!current_user_can('manage_options')) {
         wp_die(__('You do not have sufficient permissions to access this page.'));
     }
     ob_start();
-    require_once SLYR__PLUGIN_DIR.'howto.php';
+    require_once SLYRMC_PLUGIN_DIR.'howto.php';
     $howto = ob_get_clean();
     echo '<div id="howto">'.$howto.'</div>';
 }
 
-function slyr_config_page()
+function slyrmc_config_page()
 {
     if (!current_user_can('manage_options')) {
         wp_die(__('You do not have sufficient permissions to access this page.'));
     } else {
-        require_once SLYR__PLUGIN_DIR.'config.php';
+        require_once SLYRMC_PLUGIN_DIR.'config.php';
     }
 }
 
-function slyr_catalog()
+function slyrmc_catalog()
 {
 
     global $wpdb;
@@ -423,7 +423,7 @@ function slyr_catalog()
         //     return '<div class="notice notice-error"><h4> Permalink Structure Error </h4><p/>'.
         //             'A custom url or permalink structure is required for this plugin to work correctly. Contact a site admin so they can go to the Permalinks Options Page and configure the permalinks.</p>'.
         //             '</div>'.
-        //             '<script type="text/javascript"> var plugins_url = "'.plugins_url().'"; var plugin_name_dir = "'.PLUGIN_NAME_DIR.'"; </script>';
+        //             '<script type="text/javascript"> var plugins_url = "'.plugins_url().'"; var slyrmc_plugin_name_dir = "'.SLYRMC_PLUGIN_NAME_DIR.'"; </script>';
 
         // }else{
 
@@ -494,7 +494,7 @@ function slyr_catalog()
 
             if ( $type != null && $item_id != '' ) {
 
-                $apiSC = new Softclear_API();
+                $apiSC = new SLYRMC_Softclear_API();
                 if ($type == 'c' ) {
                     $return = $apiSC->get_catalog($item_id, $slyr_page_home_url,$type_url);
                 } else {
@@ -531,14 +531,14 @@ function slyr_catalog()
                         }
                     }
 
-                    $print_data = prepare_html_data($type, $return);
+                    $print_data = slyrmc_prepare_html_data($type, $return);
                 }
             }
              
             $script = 'var plugins_url = \''.esc_attr(plugins_url()).'\';
-                        var plugin_name_dir =  \''.esc_attr(PLUGIN_NAME_DIR).'\';
-                        var slyr_page_home_url =  \''.esc_attr($slyr_page_home_url).'\';
-                        var relativeUrl = \''.esc_attr($relativeurl).'\';
+                        var slyrmc_plugin_name_dir =  \''.esc_attr(SLYRMC_PLUGIN_NAME_DIR).'\';
+                        var slyrmc_page_home_url =  \''.esc_attr($slyr_page_home_url).'\';
+                        var slyrmc_relative_url = \''.esc_attr($relativeurl).'\';
                         var preloaded_info =   \''.(is_array($print_data) && !empty($print_data) ? '1' : '0').'\';
                         var preloaded_url =   \''.esc_attr($preloaded_url).'\';
                 ';
@@ -547,21 +547,21 @@ function slyr_catalog()
             wp_enqueue_script('declarations');
             wp_add_inline_script('declarations', $script);
             ob_start();
-            require_once SLYR__PLUGIN_DIR.'catalog.php';
+            require_once SLYRMC_PLUGIN_DIR.'catalog.php';
             $catalog = ob_get_clean();
 
-            return '<div id="catalog">'.$catalog.'</div>';
+            return '<div id="slyr_catalogue">'.$catalog.'</div>';
         // }
 
     } else {
-        return '<div id="catalog"><b>There are no products available right now.</b></div>'.
-            '<script type="text/javascript"> var plugins_url = "'.plugins_url().'"; var plugin_name_dir = "'.PLUGIN_NAME_DIR.'"; </script>';
+        return '<div id="slyr_catalogue"><b>There are no products available right now.</b></div>'.
+            '<script type="text/javascript"> var plugins_url = "'.plugins_url().'"; var slyrmc_plugin_name_dir = "'.SLYRMC_PLUGIN_NAME_DIR.'"; </script>';
     }
 }
 
-add_shortcode(SLYR_short_code, 'slyr_catalog');
+add_shortcode(SLYRMC_short_code, 'slyrmc_catalog');
 
-function sl_special_inline_script()
+function slyrmc_special_inline_script()
 {
     if (function_exists('wp_add_inline_script')) {
         // wp_add_inline_script is available from Wordpress 4.5
@@ -573,19 +573,19 @@ function sl_special_inline_script()
     }
 }
 
-function prepare_html_data($type, $data)
+function slyrmc_prepare_html_data($type, $data)
 {
-    $apiSC = new Softclear_API();
+    $apiSC = new SLYRMC_Softclear_API();
     $tables_fields_ids = $apiSC->get_tables_fields_ids();
     $field_cat_id = $tables_fields_ids['field_cat_id'];
     $field_prd_id = $tables_fields_ids['field_prd_id'];
 
-    $baseURL = plugins_url().'/'.PLUGIN_NAME_DIR.'/';
+    $baseURL = plugins_url().'/'.SLYRMC_PLUGIN_NAME_DIR.'/';
 
     $return_data = array();
 
     if (isset($data['breadcrumb']) && !empty($data['breadcrumb'])) {
-        $breadcrumb_html = '<li><a href="#" onclick="loadCatalog(0); return false;">Start</a></li>';
+        $breadcrumb_html = '<li><a href="#" onclick="slyrmc_load_catalog(0); return false;">Start</a></li>';
 
         foreach ($data['breadcrumb'] as $keyBR => $breadcrumb) {
 
@@ -593,7 +593,7 @@ function prepare_html_data($type, $data)
 
             ($breadcrumb == end($data['breadcrumb'])) ? $breadcrumb_class = ' class="active"' : $breadcrumb_class = '';
 
-            $breadcrumb_html .= '<li'.$breadcrumb_class.'><a href="'.esc_attr($breadcrumb_href).'" onclick="loadCatalog('.esc_js($breadcrumb[$field_cat_id]).'); return false;">'.esc_html($breadcrumb['section_name']).'</a></li>';
+            $breadcrumb_html .= '<li'.$breadcrumb_class.'><a href="'.esc_attr($breadcrumb_href).'" onclick="slyrmc_load_catalog('.esc_js($breadcrumb[$field_cat_id]).'); return false;">'.esc_html($breadcrumb['section_name']).'</a></li>';
 
         }
 
@@ -611,7 +611,7 @@ function prepare_html_data($type, $data)
             foreach ($data['categories'] as $keyCAT => $category) {
                 (isset($category['category_url']) && $category['category_url'] != '') ? $category_href = $category['category_url'] : $category_href = '#';
 
-                $categories_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.esc_attr($category_href).'" onclick="loadCatalog('.esc_js($category[$field_cat_id]).'); return false;">';
+                $categories_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.esc_attr($category_href).'" onclick="slyrmc_load_catalog('.esc_js($category[$field_cat_id]).'); return false;">';
 
                 if (isset($category['section_image'])) {
                     if (is_array($category['section_image']) && !empty($category['section_image'])) {
@@ -625,7 +625,7 @@ function prepare_html_data($type, $data)
                     $categories_html .= '<img src="'.$baseURL.'images/placeholder.gif" alt="">';
                 }
 
-                $categories_html .= '</a></div><div class="box_inf"><h7><a class="section" href="'.esc_attr($category_href).'" onclick="loadCatalog('.esc_js($category[$field_cat_id]).'); return false;">'.esc_html($category['section_name']).'</a></h7></div></div>';
+                $categories_html .= '</a></div><div class="box_inf"><h7><a class="section" href="'.esc_attr($category_href).'" onclick="slyrmc_load_catalog('.esc_js($category[$field_cat_id]).'); return false;">'.esc_html($category['section_name']).'</a></h7></div></div>';
             }
 
             $return_data['categories'] = $categories_html;
@@ -639,7 +639,7 @@ function prepare_html_data($type, $data)
             foreach ($data['products'] as $keyPROD => $product) {
                 (isset($product['product_url']) && $product['product_url'] != '') ? $product_href = $product['product_url'] : $product_href = '#';
                 (isset($product['product_name']) && $product['product_name'] && $product['product_name'] !== null) ? $product_name = esc_html($product['product_name']) : $product_name = 'Product Undefined';
-                $products_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.esc_attr($product_href).'" onclick="loadProduct('.esc_js($product[$field_prd_id]).'); return false;">';
+                $products_html .= '<div class="box_elm not_thum"><div class="box_img img_on"><a href="'.esc_attr($product_href).'" onclick="slyrmc_load_product('.esc_js($product[$field_prd_id]).'); return false;">';
 
                 if (isset($product['product_image'])) {
                     if (is_array($product['product_image']) && !empty($product['product_image'])) {
@@ -653,7 +653,7 @@ function prepare_html_data($type, $data)
                     $products_html .= '<img src="'.$baseURL.'images/placeholder.gif" alt="">';
                 }
 
-                $products_html .= '</a></div><div class="box_inf"><h7><a class="product" href="'.esc_attr($product_href).'" onclick="loadProduct('.esc_js($product[$field_prd_id]).'); return false;">'.esc_html($product_name).'</a></h7></div></div>';
+                $products_html .= '</a></div><div class="box_inf"><h7><a class="product" href="'.esc_attr($product_href).'" onclick="slyrmc_load_product('.esc_js($product[$field_prd_id]).'); return false;">'.esc_html($product_name).'</a></h7></div></div>';
             }
 
             $return_data['products'] = $products_html;
@@ -712,7 +712,7 @@ function prepare_html_data($type, $data)
                                 $change_image = $imo.",'".$image['THM']."', 'undefined'";
                             }
 
-                            $carousel_html .= '<li class="imo'.$imo.'"><a href="#" onclick="return changeImage('.$change_image.')"><img src="'.esc_attr($image['TH']).'" alt=""></a></li>';
+                            $carousel_html .= '<li class="imo'.$imo.'"><a href="#" onclick="return slyrmc_change_image('.$change_image.')"><img src="'.esc_attr($image['TH']).'" alt=""></a></li>';
                         }
 
                         if (!$div_image_preview_finished) {

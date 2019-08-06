@@ -23,10 +23,10 @@ if (!class_exists('SalesLayer_Updater')) {
     require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'SalesLayer-Updater.php';
 }
 
-class Softclear_API
+class SLYRMC_Softclear_API
 {
-    const slyr_connector_id = SLYR_connector_id;
-    const slyr_connector_key = SLYR_connector_key;
+    const SLYRMC_connector_id = SLYRMC_connector_id;
+    const SLYRMC_connector_key = SLYRMC_connector_key;
     const slyr_catalog = 'catalogue';
     const slyr_products = 'products';
     public $debug_on = false;
@@ -69,8 +69,8 @@ class Softclear_API
     {
         $this->connect_saleslayer($sl_connector_id, $sl_secret_key);
 
-        $token_sl = get_option('SLYR_unique_token');
-        $url_push =  get_site_url().'/'.$token_sl.'/';
+        $token_sl = get_option('SLYRMC_unique_token');
+        $url_push = get_site_url().'/'.$token_sl.'/';
 
         /* if (!preg_match('/^http(s)?:\/\//i', $url_push)) {
              $url_push = "http://$url_push";
@@ -82,8 +82,8 @@ class Softclear_API
             return $this->error_connect_saleslayer();
         }
 
-        update_option(self::slyr_connector_id, $sl_connector_id);
-        update_option(self::slyr_connector_key, $sl_secret_key);
+        update_option(self::SLYRMC_connector_id, $sl_connector_id);
+        update_option(self::SLYRMC_connector_key, $sl_secret_key);
 
         $get_response_table_data = $this->updater->get_response_table_data();
         $sync_data = array();
@@ -643,7 +643,7 @@ class Softclear_API
      */
     public function checkUserConnector($connectorId)
     {
-        $connectorIdOpt = get_option(self::slyr_connector_id);
+        $connectorIdOpt = get_option(self::SLYRMC_connector_id);
         if (($connectorIdOpt == null) || ($connectorIdOpt == $connectorId)) {
             return true;
         }
@@ -832,15 +832,15 @@ class Softclear_API
     private function connect_saleslayer($connectorId = null, $secretKey = null)
     {
         if ($connectorId == null) {
-            $connectorId = get_option(SLYR_connector_id);
-            $secretKey = get_option(SLYR_connector_key);
+            $connectorId = get_option(SLYRMC_connector_id);
+            $secretKey = get_option(SLYRMC_connector_key);
         }
 
         // Instantiate the class
         if ($this->updater == null) {
             $this->updater = new SalesLayer_Updater(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, $connectorId, $secretKey);
 
-            $this->updater->set_URL_connection(SLYR_url_API);
+            $this->updater->set_URL_connection(SLYRMC_url_API);
         } else {
             if ($this->updater->get_identification_code() != $connectorId) {
                 $this->updater->set_identification($connectorId, $secretKey);
@@ -857,7 +857,7 @@ class Softclear_API
     private function error_connect_saleslayer()
     {
         $error_array = array();
-        $error_array['type'] = esc_attr(SLYR_name);
+        $error_array['type'] = esc_attr(SLYRMC_name);
         $error_array['code'] = esc_attr($this->updater->get_response_error());
         $error_array['message'] = esc_html($this->updater->get_response_error_message());
 

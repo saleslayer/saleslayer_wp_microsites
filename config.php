@@ -6,23 +6,23 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once SLYR__PLUGIN_DIR.'admin/SlPlugin.class.php';
+require_once SLYRMC_PLUGIN_DIR.'admin/Plugin.class.php';
 
 if (!current_user_can('administrator')) {
     die('There are insufficient permissions to enter here. Have you logged in?');
 }
 
-$backend = new SlPlugin();
+$backend = new SLYRMC_Plugin();
 $importOk = false;
 $r = false;
 $_SESSION['slyr']['last_step'] = ($_SESSION['slyr']['last_step'] == null ? 0 : $_SESSION['slyr']['last_step']);
 
-if (($slyr_conn_id = get_option(SLYR_connector_id) and $_SESSION['slyr']['last_step'] == 1) or $_SESSION['slyr']['last_step'] > 1) {
+if (($slyr_conn_id = get_option(SLYRMC_connector_id) and $_SESSION['slyr']['last_step'] == 1) or $_SESSION['slyr']['last_step'] > 1) {
     $_SESSION['slyr']['last_step'] = 0;
 
     unset($_GET['action']);
 }
- $script = 'var plugin_name_dir = \''.esc_attr(PLUGIN_NAME_DIR).'\';';
+ $script = 'var slyrmc_plugin_name_dir = \''.esc_attr(SLYRMC_PLUGIN_NAME_DIR).'\';';
 
 wp_register_script('config_name', '');
 wp_enqueue_script('config_name');
@@ -50,7 +50,7 @@ if (isset($_POST['connector-id']) && isset($_POST['private-key'])) {
         }
     }
 } elseif (isset($_POST['import']) or isset($_POST['update'])) {
-    $r = $backend->sync(get_option(SLYR_connector_id), get_option(SLYR_connector_key));
+    $r = $backend->sync(get_option(SLYRMC_connector_id), get_option(SLYRMC_connector_key));
 
     if (!isset($r['error'])) {
         $importOk = true;
@@ -60,7 +60,7 @@ if (isset($_POST['connector-id']) && isset($_POST['private-key'])) {
             $slyr_conn_id = $_SESSION['slyr']['connector-id'];
             $slyr_conn_key = $_SESSION['slyr']['private-key'];
         } else {
-            $slyr_conn_key = get_option(SLYR_connector_key);
+            $slyr_conn_key = get_option(SLYRMC_connector_key);
         }
 
         if (isset($_POST['import'])) {
@@ -72,8 +72,8 @@ if (isset($_POST['connector-id']) && isset($_POST['private-key'])) {
 } elseif (isset($_GET['slyr_logout']) && $_GET['slyr_logout'] == 1) {
     unset($_SESSION['slyr']['connector-id'], $_SESSION['slyr']['private-key'], $_GET['slyr_logout']);
 
-    update_option(SLYR_connector_id, 0);
-    update_option(SLYR_connector_key, 0);
+    update_option(SLYRMC_connector_id, 0);
+    update_option(SLYRMC_connector_key, 0);
 
     $_SESSION['slyr']['last_step'] = 1;
 } elseif (!$slyr_conn_id or isset($_POST['change'])) {
@@ -93,7 +93,7 @@ if (isset($_POST['connector-id']) && isset($_POST['private-key'])) {
     <div class="container login">
         <div class="login-screen">
             <div class="login-icon">
-                <h1><?php echo esc_html(SLYR_name); ?> plugin
+                <h1><?php echo esc_html(SLYRMC_name); ?> plugin
                     <small>/ configuration</small>
                 </h1>
             </div>
@@ -180,7 +180,7 @@ if (isset($_POST['connector-id']) && isset($_POST['private-key'])) {
                         </table>
                         <button id="connect" class="button button-primary button_block">Connect!</button>
                         <?php if ($slyr_conn_id): ?>
-                            <a href="<?php echo admin_url('admin.php?page=slyr_config&action=cancel_change') ?>"
+                            <a href="<?php echo admin_url('admin.php?page=slyrmc_config&action=cancel_change') ?>"
                                class="button action" style="margin-top:10px"><strong>Cancel</strong></a>
                         <?php endif; ?>
                     <?php endif; ?>

@@ -1,11 +1,11 @@
-var baseURL = '',
-    serviceURL = 'ajax_hook.php',
+var slyrmc_base_url = '',
+    slyrmc_service_url = 'ajax_hook.php',
     list_exclusion = [],
-    lastIdCategory = 0,
-    slyr_cache = [],
-    field_cat_id = '',
-    field_cat_parent_id = '',
-    field_prd_id = '';
+    slyrmc_last_id_category = 0,
+    slyrmc_cache = [],
+    slyrmc_field_cat_id = '',
+    slyrmc_field_cat_parent_id = '',
+    slyrmc_field_prd_id = '';
 
 list_exclusion.push('id');
 list_exclusion.push('parent_id');
@@ -14,51 +14,51 @@ list_exclusion.push('id_catalogue');
 list_exclusion.push('sl_product_name');
 list_exclusion.push('sl_product_image');
 
-function slyr_trim(a) {
+function slyrmc_trim(a) {
     return a.replace(/^\s+|\s+$/g, '');
 }
 
-function preloadShow() {
+function slyrmc_preload_show() {
     $('#gnrl_ldng').show();
 }
 
-function preloadHide() {
+function slyrmc_preload_hide() {
     $('#gnrl_ldng').hide();
 }
 
-function loadFastMenu() {
+function slyrmc_load_fast_menu() {
 
     $.ajax({
         type: "post",
         url: sl_ajax_object.ajax_url,
         data: {
-            action:'sl_catalog_control',
+            action:'slyrmc_catalog_control',
             endpoint: "menu",
-            web_url: slyr_page_home_url,
+            web_url: slyrmc_page_home_url,
             _ajax_nonce: sl_ajax_object.nonce
         }
     }).done(function (result) {
-        paintFastMenu(result, 'collapse_catalog_1');
+        slyrmc_paint_fast_menu(result, 'collapse_catalog_1');
     });
 }
 
-function paintFastMenu(fastMenuArray, divElem) {
+function slyrmc_paint_fast_menu(fastMenuArray, divElem) {
 
     $.each(fastMenuArray, function (key, menuObj) {
         if (menuObj.hasOwnProperty('submenu')) {
 
             var liAdd = '<li class="accordion-group" id="li_category_';
-            liAdd = liAdd.concat(menuObj[field_cat_id]);
+            liAdd = liAdd.concat(menuObj[slyrmc_field_cat_id]);
             liAdd = liAdd.concat('"><a class="accordion-toggle collapsed"  ');
-            var href = "#collapse_categories_" + menuObj[field_cat_id];
+            var href = "#collapse_categories_" + menuObj[slyrmc_field_cat_id];
             if (typeof menuObj.category_url !== 'undefined') {
-                href = htmlEntities(menuObj.category_url);
+                href = slyrmc_html_entities(menuObj.category_url);
             }
             liAdd = liAdd.concat('data-parent="#menu_pr" href="' + href);
             liAdd = liAdd.concat('" title="' + menuObj.section_name + '" data-original-title="Categorie_');
-            liAdd = liAdd.concat(menuObj[field_cat_id]);
-            liAdd = liAdd.concat('" onclick="loadCatalog(');
-            liAdd = liAdd.concat(menuObj[field_cat_id]);
+            liAdd = liAdd.concat(menuObj[slyrmc_field_cat_id]);
+            liAdd = liAdd.concat('" onclick="slyrmc_load_catalog(');
+            liAdd = liAdd.concat(menuObj[slyrmc_field_cat_id]);
             liAdd = liAdd.concat('); return false;"><em>');
             liAdd = liAdd.concat(menuObj.section_name);
             liAdd = liAdd.concat('</em></a>');
@@ -66,19 +66,19 @@ function paintFastMenu(fastMenuArray, divElem) {
             $("#" + divElem).append(liAdd);
 
             var ulAdd = '<ul id="collapse_categories_';
-            ulAdd = ulAdd.concat(menuObj[field_cat_id]);
+            ulAdd = ulAdd.concat(menuObj[slyrmc_field_cat_id]);
             ulAdd = ulAdd.concat('" class="accordion-body collapse in" style="height: auto;"></ul>');
-            $("#li_category_" + menuObj[field_cat_id]).append(ulAdd);
+            $("#li_category_" + menuObj[slyrmc_field_cat_id]).append(ulAdd);
 
-            paintFastMenu(menuObj.submenu, 'collapse_categories_' + menuObj[field_cat_id]);
+            slyrmc_paint_fast_menu(menuObj.submenu, 'collapse_categories_' + menuObj[slyrmc_field_cat_id]);
         } else {
             var liAdd = '<li class="accordion-group">';
             var href = "#";
             if (typeof menuObj.category_url !== 'undefined') {
-                href = htmlEntities(menuObj.category_url);
+                href = slyrmc_html_entities(menuObj.category_url);
             }
-            liAdd = liAdd.concat('<a href="' + href + '" onclick="loadCatalog(');
-            liAdd = liAdd.concat(menuObj[field_cat_id]);
+            liAdd = liAdd.concat('<a href="' + href + '" onclick="slyrmc_load_catalog(');
+            liAdd = liAdd.concat(menuObj[slyrmc_field_cat_id]);
             liAdd = liAdd.concat('); return false;"><em>');
             liAdd = liAdd.concat(menuObj.section_name);
             liAdd = liAdd.concat('</em></a></li>');
@@ -87,36 +87,36 @@ function paintFastMenu(fastMenuArray, divElem) {
     });
 }
 
-function loadCatalog(idcategory, force_load = true) {
+function slyrmc_load_catalog(idcategory, force_load = true) {
 
     idcategory = idcategory || 0;
 
-    if (typeof (slyr_cache['cat']) == 'undefined') slyr_cache['cat'] = [];
-    if (typeof (slyr_cache['cat'][idcategory]) == 'undefined' || force_load) {
+    if (typeof (slyrmc_cache['cat']) == 'undefined') slyrmc_cache['cat'] = [];
+    if (typeof (slyrmc_cache['cat'][idcategory]) == 'undefined' || force_load) {
 
-        preloadShow();
+        slyrmc_preload_show();
 
         $.ajax({
             type: "post",
             url: sl_ajax_object.ajax_url,
-            data: {action:'sl_catalog_control',
+            data: {action:'slyrmc_catalog_control',
                 endpoint: "catalog",
                 id: idcategory,
-                web_url: slyr_page_home_url,
+                web_url: slyrmc_page_home_url,
                 _ajax_nonce: sl_ajax_object.nonce}
         })
             .done(function (result) {
 
                 if (result == 0) {
 
-                    loadCatalog(0);
+                    slyrmc_load_catalog(0);
 
                 } else {
 
-                    slyr_cache['cat'][idcategory] = result;
-                    update_url('categories', idcategory);
-                    paintCatalog(result);
-                    preloadHide();
+                    slyrmc_cache['cat'][idcategory] = result;
+                    slyrmc_update_url('categories', idcategory);
+                    slyrmc_paint_catalog(result);
+                    slyrmc_preload_hide();
 
                 }
 
@@ -124,20 +124,20 @@ function loadCatalog(idcategory, force_load = true) {
 
     } else {
 
-        paintCatalog(slyr_cache['cat'][idcategory]);
-        update_url('categories', idcategory);
+        slyrmc_paint_catalog(slyrmc_cache['cat'][idcategory]);
+        slyrmc_update_url('categories', idcategory);
 
     }
 
 }
 
-function update_url(type = 'categories', item_id) {
+function slyrmc_update_url(type = 'categories', item_id) {
 
     var url_to_update = '';
 
     if (item_id == 0) {
 
-        url_to_update = slyr_page_home_url;
+        url_to_update = slyrmc_page_home_url;
 
     } else {
 
@@ -156,20 +156,20 @@ function update_url(type = 'categories', item_id) {
 
         if (type == 'categories') {
 
-            if (slyr_cache[cache_idx][item_id] && Object.keys(slyr_cache[cache_idx][item_id]).length > 0) {
+            if (slyrmc_cache[cache_idx][item_id] && Object.keys(slyrmc_cache[cache_idx][item_id]).length > 0) {
 
                 indexes.forEach(function (index) {
 
                     if (url_to_update == '') {
 
-                        if (slyr_cache[cache_idx][item_id][index] && slyr_cache[cache_idx][item_id][index].length > 0) {
+                        if (slyrmc_cache[cache_idx][item_id][index] && slyrmc_cache[cache_idx][item_id][index].length > 0) {
 
-                            var itemArray = slyr_cache[cache_idx][item_id][index];
+                            var itemArray = slyrmc_cache[cache_idx][item_id][index];
 
-                            for (var i = 0; i < slyr_cache[cache_idx][item_id][index].length; i++) {
+                            for (var i = 0; i < slyrmc_cache[cache_idx][item_id][index].length; i++) {
 
                                 var itemObj = itemArray[i];
-                                if (itemObj[field_cat_id] == item_id) {
+                                if (itemObj[slyrmc_field_cat_id] == item_id) {
 
                                     if (typeof itemObj.category_url !== 'undefined') {
 
@@ -193,11 +193,11 @@ function update_url(type = 'categories', item_id) {
 
         } else {
 
-            if (slyr_cache[cache_idx][item_id]) {
+            if (slyrmc_cache[cache_idx][item_id]) {
 
-                var itemArray = slyr_cache[cache_idx][item_id]['products'];
+                var itemArray = slyrmc_cache[cache_idx][item_id]['products'];
 
-                for (var i = 0; i < slyr_cache[cache_idx][item_id]['products'].length; i++) {
+                for (var i = 0; i < slyrmc_cache[cache_idx][item_id]['products'].length; i++) {
 
                     var itemObj = itemArray[i];
 
@@ -221,13 +221,13 @@ function update_url(type = 'categories', item_id) {
 
     if (url_to_update != '') {
 
-        window.history.pushState({}, null, htmlEntities(url_to_update));
+        window.history.pushState({}, null, slyrmc_html_entities(url_to_update));
 
     }
 
 }
 
-function slyr_scrollTop() {
+function slyrmc_scroll_top() {
 
     var t = $('#slyr_catalogue').parent().position(true).top,
         o = $('html').scrollTop();
@@ -236,13 +236,13 @@ function slyr_scrollTop() {
 
 }
 
-function htmlEntities(encodedString) {
+function slyrmc_html_entities(encodedString) {
     var textArea = document.createElement('textarea');
     textArea.innerHTML = encodedString;
     return textArea.value;
 }
 
-function paintCatalog(catalog) {
+function slyrmc_paint_catalog(catalog) {
 
     var no_elements = true;
 
@@ -252,7 +252,7 @@ function paintCatalog(catalog) {
     $("#div_category").empty();
     $("#breadcrumb_ul").empty();
 
-    paintBreadcrumb(catalog.breadcrumb);
+    slyrmc_paint_breadcrumb(catalog.breadcrumb);
 
     if (catalog.categories && catalog.categories.length > 0) {
         no_elements = false;
@@ -261,13 +261,13 @@ function paintCatalog(catalog) {
             var categoryObj = categoryArray[i];
             var href = "#";
             if (typeof categoryObj.category_url !== 'undefined') {
-                href = htmlEntities(categoryObj.category_url);
+                href = slyrmc_html_entities(categoryObj.category_url);
             }
 
             var divAdd = '<div class="box_elm not_thum">';
             divAdd = divAdd.concat('<div class="box_img img_on">');
-            divAdd = divAdd.concat('<a href="' + href + '" onclick="loadCatalog(');
-            divAdd = divAdd.concat(categoryObj[field_cat_id]);
+            divAdd = divAdd.concat('<a href="' + href + '" onclick="slyrmc_load_catalog(');
+            divAdd = divAdd.concat(categoryObj[slyrmc_field_cat_id]);
             divAdd = divAdd.concat('); return false;">');
 
             if (categoryObj.hasOwnProperty('section_image') && categoryObj.section_image != '' && categoryObj.section_image != null) {
@@ -275,12 +275,12 @@ function paintCatalog(catalog) {
                 divAdd = divAdd.concat(categoryObj.section_image);
                 divAdd = divAdd.concat('">');
             } else {
-                divAdd = divAdd.concat('<img alt="" src="' + baseURL + 'images/placeholder.gif">');
+                divAdd = divAdd.concat('<img alt="" src="' + slyrmc_base_url + 'images/placeholder.gif">');
             }
 
             divAdd = divAdd.concat('</a></div><div class="box_inf">');
-            divAdd = divAdd.concat('<h7><a class="section" title="'+categoryObj.section_name+'" href="' + href + '" onclick="loadCatalog(');
-            divAdd = divAdd.concat(categoryObj[field_cat_id]);
+            divAdd = divAdd.concat('<h7><a class="section" title="'+categoryObj.section_name+'" href="' + href + '" onclick="slyrmc_load_catalog(');
+            divAdd = divAdd.concat(categoryObj[slyrmc_field_cat_id]);
             divAdd = divAdd.concat('); return false;">');
             divAdd = divAdd.concat(categoryObj.section_name);
             divAdd = divAdd.concat('</a></h7></div></div>');
@@ -296,13 +296,13 @@ function paintCatalog(catalog) {
             var productObj = productArray[i];
             var href = "#";
             if (typeof productObj.product_url !== 'undefined') {
-                href = htmlEntities(productObj.product_url);
+                href = slyrmc_html_entities(productObj.product_url);
             }
 
             var divAdd = '<div class="box_elm not_thum ">';
             divAdd = divAdd.concat('<div class="box_img img_on">');
-            divAdd = divAdd.concat('<a href="' + href + '" alt="'+productObj.product_name+'" onclick="loadProduct(');
-            divAdd = divAdd.concat(productObj[field_prd_id]);
+            divAdd = divAdd.concat('<a href="' + href + '" alt="'+productObj.product_name+'" onclick="slyrmc_load_product(');
+            divAdd = divAdd.concat(productObj[slyrmc_field_prd_id]);
             divAdd = divAdd.concat('); return false;">');
 
             if (productObj.hasOwnProperty('product_image') && productObj.product_image != "") {
@@ -310,12 +310,12 @@ function paintCatalog(catalog) {
                 divAdd = divAdd.concat(productObj.product_image);
                 divAdd = divAdd.concat('">');
             } else {
-                divAdd = divAdd.concat('<img alt="" src="' + baseURL + 'images/placeholder.gif">');
+                divAdd = divAdd.concat('<img alt="" src="' + slyrmc_base_url + 'images/placeholder.gif">');
             }
 
             divAdd = divAdd.concat('</a></div><div class="box_inf">');
-            divAdd = divAdd.concat('<h7><a title="'+productObj.product_name+'" href="' + href + '" class="product" onclick="loadProduct(');
-            divAdd = divAdd.concat(productObj[field_prd_id]);
+            divAdd = divAdd.concat('<h7><a title="'+productObj.product_name+'" href="' + href + '" class="product" onclick="slyrmc_load_product(');
+            divAdd = divAdd.concat(productObj[slyrmc_field_prd_id]);
             divAdd = divAdd.concat('); return false;">');
             if (productObj.product_name) {
                 divAdd = divAdd.concat(productObj.product_name);
@@ -327,8 +327,8 @@ function paintCatalog(catalog) {
         }
 
         last_crumb = (catalog.breadcrumb != null) ? catalog.breadcrumb.length - 1 : 0;
-        lastIdCategory = (last_crumb >= 0 && typeof (catalog.breadcrumb[last_crumb]) != 'undefined') ?
-            ((catalog.breadcrumb != null) ? catalog.breadcrumb[last_crumb][field_cat_id] : 0) : 0;
+        slyrmc_last_id_category = (last_crumb >= 0 && typeof (catalog.breadcrumb[last_crumb]) != 'undefined') ?
+            ((catalog.breadcrumb != null) ? catalog.breadcrumb[last_crumb][slyrmc_field_cat_id] : 0) : 0;
     }
 
     if (no_elements) {
@@ -339,12 +339,12 @@ function paintCatalog(catalog) {
         $("#dropdown_ul").empty();
     }
 
-    slyr_scrollTop();
+    slyrmc_scroll_top();
 }
 
-function paintBreadcrumb(breadcrumbArray) {
+function slyrmc_paint_breadcrumb(breadcrumbArray) {
 
-    var liAdd = '<li><a href="#" onclick="loadCatalog(0); return false;">Start</a></li>';
+    var liAdd = '<li><a href="#" onclick="slyrmc_load_catalog(0); return false;">Start</a></li>';
     $("#breadcrumb_ul").append(liAdd);
 
     if (breadcrumbArray != null) {
@@ -356,16 +356,16 @@ function paintBreadcrumb(breadcrumbArray) {
             var liAdd = '';
             var href = "#";
             if (typeof breadcrumb.category_url !== 'undefined') {
-                href = htmlEntities(breadcrumb.category_url);
+                href = slyrmc_html_entities(breadcrumb.category_url);
             }
 
             //si es el ultimo elemento...
             if (i == last) {
-                liAdd = liAdd.concat('<li class="active"><a href="' + href + '" onclick="loadCatalog(');
+                liAdd = liAdd.concat('<li class="active"><a href="' + href + '" onclick="slyrmc_load_catalog(');
             } else {
-                liAdd = liAdd.concat('<li><a href="' + href + '" onclick="loadCatalog(');
+                liAdd = liAdd.concat('<li><a href="' + href + '" onclick="slyrmc_load_catalog(');
             }
-            liAdd = liAdd.concat(breadcrumb[field_cat_id]);
+            liAdd = liAdd.concat(breadcrumb[slyrmc_field_cat_id]);
             liAdd = liAdd.concat('); return false;">');
             liAdd = liAdd.concat(breadcrumb.section_name);
             liAdd = liAdd.concat('</a></li>');
@@ -375,40 +375,40 @@ function paintBreadcrumb(breadcrumbArray) {
     }
 }
 
-function loadProduct(idproduct) {
+function slyrmc_load_product(idproduct) {
 
-    if (typeof (slyr_cache['prd']) == 'undefined') {
+    if (typeof (slyrmc_cache['prd']) == 'undefined') {
 
-        slyr_cache['prd'] = [];
+        slyrmc_cache['prd'] = [];
 
     }
 
-    if (typeof (slyr_cache['prd'][idproduct]) == 'undefined') {
+    if (typeof (slyrmc_cache['prd'][idproduct]) == 'undefined') {
 
-        preloadShow();
+        slyrmc_preload_show();
 
         $.ajax({
             type: 'post',
             url: sl_ajax_object.ajax_url,
             data: {
-                action:'sl_catalog_control',
+                action:'slyrmc_catalog_control',
                 endpoint: 'products',
                 id: idproduct,
-                web_url: slyr_page_home_url,
+                web_url: slyrmc_page_home_url,
                 _ajax_nonce: sl_ajax_object.nonce}
         })
             .done(function (result) {
 
                 if (result == 0) {
 
-                    loadCatalog(0);
+                    slyrmc_load_catalog(0);
 
                 } else {
 
-                    slyr_cache['prd'][idproduct] = result;
-                    update_url('products', idproduct);
-                    paintProduct(result);
-                    preloadHide();
+                    slyrmc_cache['prd'][idproduct] = result;
+                    slyrmc_update_url('products', idproduct);
+                    slyrmc_paint_product(result);
+                    slyrmc_preload_hide();
 
                 }
 
@@ -416,25 +416,25 @@ function loadProduct(idproduct) {
 
     } else {
 
-        paintProduct(slyr_cache['prd'][idproduct]);
-        update_url('products', idproduct);
+        slyrmc_paint_product(slyrmc_cache['prd'][idproduct]);
+        slyrmc_update_url('products', idproduct);
 
     }
 
 }
 
-function backCatalog(catalog_id) {
+function slyrmc_back_catalog(catalog_id) {
 
-    loadCatalog(catalog_id);
+    slyrmc_load_catalog(catalog_id);
     $('#site-canvas-product').hide(0);
     $('#div_category').show(0);
 
 }
 
-function paintProduct(product) {
+function slyrmc_paint_product(product) {
 
     $("#breadcrumb_ul").empty();
-    paintBreadcrumb(product.breadcrumb);
+    slyrmc_paint_breadcrumb(product.breadcrumb);
 
     if (product.products.length) {
 
@@ -462,7 +462,7 @@ function paintProduct(product) {
             $('#p_product_description').empty().append(options.product_description);
             $('#p_characteristics').empty().append(options.characteristics);
             $('#p_formats').empty().append(options.formats);
-            $('#backcatalog').attr("onclick", "backCatalog('" + options[field_cat_id] + "'); return false;");
+            $('#backcatalog').attr("onclick", "slyrmc_back_catalog('" + options[slyrmc_field_cat_id] + "'); return false;");
 
             if (options.hasOwnProperty('product_image') && options.product_image != '' && options.product_image != null) {
 
@@ -501,7 +501,7 @@ function paintProduct(product) {
 
                     $.each(options.product_image, function (k, imgs) {
 
-                        $('#carousel').append('<li  class="imo' + imo + (k == kbase ? ' current' : '') + '"><a href="#" onclick="return changeImage(' +
+                        $('#carousel').append('<li  class="imo' + imo + (k == kbase ? ' current' : '') + '"><a href="#" onclick="return slyrmc_change_image(' +
                             imo + ',\'' + imgs.THM + '\',\'' + imgs[img_fmt] + '\')"><img src="' + imgs.TH + '"/></a></li>');
 
                         imo++;
@@ -510,7 +510,7 @@ function paintProduct(product) {
 
             } else {
 
-                $('#div_image_preview').append($('<img>', {id: 'preview', src: (baseURL + 'images/placeholder.gif'), alt:options.product_name}));
+                $('#div_image_preview').append($('<img>', {id: 'preview', src: (slyrmc_base_url + 'images/placeholder.gif'), alt:options.product_name}));
                 $('<ul>', {id: 'carousel', class: 'elastislide-list'}).appendTo('#gallery');
             }
 
@@ -519,13 +519,13 @@ function paintProduct(product) {
         Shadowbox.clearCache();
         Shadowbox.setup();
 
-        slyr_scrollTop();
+        slyrmc_scroll_top();
 
     }
 
 }
 
-function changeImage(k, ih, ib) {
+function slyrmc_change_image(k, ih, ib) {
 
     $('#preview').attr('src', ih);
     $('#apreview').attr('href', ib);
@@ -540,14 +540,14 @@ function changeImage(k, ih, ib) {
     return false;
 }
 
-function check_slyr_page_params() {
+function slyrmc_check_slyr_page_params() {
 
     var exploded_pathname = window.location.pathname.split('/');
     var url_has_item = false;
     var item_id;
     if (exploded_pathname.length > 0) {
 
-        if (exploded_pathname[exploded_pathname.length - 2] == relativeUrl) {
+        if (exploded_pathname[exploded_pathname.length - 2] == slyrmc_service_url) {
 
             if (typeof exploded_pathname[exploded_pathname.length - 1] !== 'undefined' && exploded_pathname[3] != '') {
 
@@ -555,13 +555,13 @@ function check_slyr_page_params() {
                 if (type == 'c') {
                     url_has_item = true;
                     item_id = exploded_pathname[exploded_pathname.length - 1].substr(1, exploded_pathname[exploded_pathname.length - 1].length);
-                    loadCatalog(item_id);
+                    slyrmc_load_catalog(item_id);
 
                 } else if (type == 'p') {
 
                     url_has_item = true;
                     item_id = exploded_pathname[exploded_pathname.length - 1].substr(1, exploded_pathname[exploded_pathname.length - 1].length);
-                    loadProduct(item_id);
+                    slyrmc_load_product(item_id);
 
                 }
 
@@ -573,59 +573,58 @@ function check_slyr_page_params() {
 
     if (!url_has_item) {
 
-        loadCatalog(0);
+        slyrmc_load_catalog(0);
 
     }
 
 }
 
-function loadVars() {
+function slyrmc_load_vars() {
 
-    if (typeof plugins_url !== 'undefined' && typeof plugin_name_dir !== 'undefined') {
+    if (typeof plugins_url !== 'undefined' && typeof slyrmc_plugin_name_dir !== 'undefined') {
 
-        baseURL = plugins_url + '/' + plugin_name_dir + '/';
+        slyrmc_base_url = plugins_url + '/' + slyrmc_plugin_name_dir + '/';
 
-        $('.slyr_cat_prld').css('background', 'url(' + baseURL + 'images/loading.gif) center center no-repeat');
+        $('.slyr_cat_prld').css('background', 'url(' + slyrmc_base_url + 'images/loading.gif) center center no-repeat');
 
     }
 
-    if (typeof field_cat_id === 'undefined' || field_cat_id === '' || typeof field_cat_parent_id === 'undefined' || field_cat_parent_id === '' || typeof field_prd_id === 'undefined' || field_prd_id === '') {
+    if (typeof slyrmc_field_cat_id === 'undefined' || slyrmc_field_cat_id === '' || typeof slyrmc_field_cat_parent_id === 'undefined' || slyrmc_field_cat_parent_id === '' || typeof slyrmc_field_prd_id === 'undefined' || field_prd_id === '') {
         
-        jQuery.post({
+        $.ajax({
+            type: 'post',
             url:sl_ajax_object.ajax_url,
             data: {
-                action:'sl_catalog_control',
+                action:'slyrmc_catalog_control',
                 endpoint: 'tables_fields_ids',
-               _ajax_nonce: sl_ajax_object.nonce
+                _ajax_nonce: sl_ajax_object.nonce
             }
-            ,success: function (tables_fields_ids) {
-                field_cat_id = tables_fields_ids.field_cat_id;
-                field_cat_parent_id = tables_fields_ids.field_cat_parent_id;
-                field_prd_id = tables_fields_ids.field_prd_id;
-                load_content();
-            },error: function( jqXHR,  textStatus,  errorThrown){
-                console.log(errorThrown);
-            }
+        }).done(function (tables_fields_ids) {
+            slyrmc_field_cat_id = tables_fields_ids.field_cat_id;
+            slyrmc_field_cat_parent_id = tables_fields_ids.field_cat_parent_id;
+            slyrmc_field_prd_id = tables_fields_ids.field_prd_id;
+            slyrmc_load_content();
         });
 
     }
 
 }
 
-function load_content() {
+function slyrmc_load_content() {
+    
     if (typeof sl_ajax_object.ajax_url !== 'undefined' && sl_ajax_object.ajax_url != '') {
 
-        loadFastMenu();
+        slyrmc_load_fast_menu();
 
         if (preloaded_info == 0) {
 
-            check_slyr_page_params();
+            slyrmc_check_slyr_page_params();
 
         } else {
 
             if (preloaded_url != '') {
 
-                window.history.pushState({}, null, htmlEntities(preloaded_url));
+                window.history.pushState({}, null, slyrmc_html_entities(preloaded_url));
 
             }
 
@@ -643,10 +642,10 @@ function load_content() {
                     type: 'post',
                     url: sl_ajax_object.ajax_url,
                     data: {
-                        action:'sl_catalog_control',
+                        action:'slyrmc_catalog_control',
                         endpoint: 'search_item',
                            search_value: search_value,
-                           web_url: slyr_page_home_url,
+                           web_url: slyrmc_page_home_url,
                            _ajax_nonce: sl_ajax_object.nonce
                     }
                 })
@@ -655,17 +654,17 @@ function load_content() {
                         if (result == 0) {
 
                             $("#sl_search_value").val('');
-                            loadCatalog(0);
+                            slyrmc_load_catalog(0);
 
                         } else {
 
                             if (result.type == 'c') {
 
-                                loadCatalog(result.id);
+                                slyrmc_load_catalog(result.id);
 
                             } else if (result.type == 'p') {
 
-                                loadProduct(result.id);
+                                slyrmc_load_product(result.id);
 
                             }
 
@@ -685,7 +684,7 @@ function load_content() {
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    loadVars();
+    slyrmc_load_vars();
 
 });
 

@@ -118,7 +118,7 @@
                                         $product_catalogue_id = '';
                                     } ?>
                                 <div><a href="#" id="backcatalog" class="btn btn-lg btn-primary"
-                                        onclick="backCatalog('<?php echo esc_js($product_catalogue_id); ?>'); return false;">&larr;
+                                        onclick="slyrmc_back_catalog('<?php echo esc_js($product_catalogue_id); ?>'); return false;">&larr;
                                         back</a></div>
                             <?php
                                 } ?>

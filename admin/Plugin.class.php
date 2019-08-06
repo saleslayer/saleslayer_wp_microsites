@@ -3,16 +3,16 @@
 if (! Defined('ABSPATH')) {
     exit;
 }
-if (!defined('SLYR_connector_id')) {
-    include_once SLYR__PLUGIN_DIR.'../settings.php';
+if (!defined('SLYRMC_connector_id')) {
+    include_once SLYRMC_PLUGIN_DIR.'../settings.php';
 }
-if (!class_exists('Softclear_API')) {
-    require_once SLYR__PLUGIN_DIR.'admin/api/api_sc.php';
+if (!class_exists('SLYRMC_Softclear_API')) {
+    require_once SLYRMC_PLUGIN_DIR.'admin/api/api_sc.php';
 }
 
 // plugin lib
 
-class SlPlugin extends Softclear_API
+class SLYRMC_Plugin extends SLYRMC_Softclear_API
 {
 
     private $connector;
