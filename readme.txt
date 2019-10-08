@@ -50,9 +50,9 @@ SEO optimizations, stability and security
 
 == Screenshots ==
 
-1. https://raw.githubusercontent.com/saleslayer/saleslayer_wp_microsites/master/images/screenshot-1.png
-1. https://raw.githubusercontent.com/saleslayer/saleslayer_wp_microsites/master/images/screenshot-2.png
-1. https://raw.githubusercontent.com/saleslayer/saleslayer_wp_microsites/master/images/screenshot-3.png
-1. https://raw.githubusercontent.com/saleslayer/saleslayer_wp_microsites/master/images/screenshot-4.png
+1. Lateral and breadcrumb categories trees, plus image visualization.
+2. Hide lateral category tree to visualize more elements.
+3. Responsive, adapts to any device.
+4. Quick and easy configuration.
 
 

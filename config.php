@@ -109,7 +109,7 @@ if (isset($_POST['connector-id']) && isset($_POST['private-key'])) {
                     if ($_SESSION["slyr"]["last_step"] == 0) :
                         $slyr_config = $GLOBALS['wpdb']->get_results('select * from slyr___api_config');
 
-                        if (isset($r['catalogue']) && is_array($r['catalogue']) && !empty($r['catalogue'])) {
+                        if (!isset($r['error']) && is_array($r) && !empty($r)){
                             $toshow = '<h6>Changes:</h6>';
                             $toshow .= '<ul class="list_changes">';
 
